@@ -1,0 +1,19 @@
+{
+    "cSpell.words": [
+        "babylonjs"
+    ],
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/dist": false,
+        "**/@babylonjs/**/*.{js|ts|map}": true,
+        "**/.rollup.cache": true,
+        "**/packages/dev/**/Shaders/**/*.ts": true,
+        "**/packages/dev/**/shaders/**/*.ts": true,
+        "**/*.fragment.ts": true,
+        "**/*.vertex.ts": true,
+        "**/*.compute.ts": true,
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+}
