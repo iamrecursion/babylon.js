@@ -1,6 +1,560 @@
 {
-    "fromTag": "5.39.0",
+    "fromTag": "5.41.0",
     "changelog": {
+        "5.41.0": [
+            {
+                "pr": "13404",
+                "title": "Fix calculation of text height in InputTextArea",
+                "description": "The variables used to calculate where the text's y position would be in the InputTextArea were not using the most up-to-date measure of the control, so the position would be incorrect inside a scroll view:\r\n![image](https://user-images.githubusercontent.com/6002144/210601455-b4103773-7269-4be9-aaa0-7ad1dc01fc2b.png)\r\nWith the fix:\r\n![image](https://user-images.githubusercontent.com/6002144/210601500-6c873cf5-9035-439b-abf6-d3ebc7382dfd.png)\r\n",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/inputTextArea.ts",
+                    "packages/tools/tests/test/visualization/ReferenceImages/GUI Input Text Area Inside ScrollViewer.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13394",
+                "title": "GUI Editor Line Gizmo Improvements",
+                "description": "This PR introduces functionality to move, drag endpoints and rotate the Lines Gizmo on the GUI Editor.\r\n\r\nWithout the change:\r\n![current-line-gizmo-behavior](https://user-images.githubusercontent.com/6002144/210366143-6ca3a67d-551c-4d27-9be4-e2aba12ce248.gif)\r\n\r\nWith the change:\r\n![new-line-gizmo-behavior](https://user-images.githubusercontent.com/6002144/210366179-e61d460b-e181-4f92-9b15-5ffc36118cc4.gif)\r\n\r\n",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/control.ts",
+                    "packages/dev/gui/src/2D/controls/line.ts",
+                    "packages/tools/guiEditor/src/diagram/gizmoLine.tsx",
+                    "packages/tools/guiEditor/src/diagram/gizmoScalePoint.tsx"
+                ],
+                "tags": [
+                    "enhancement",
+                    "gui editor"
+                ]
+            },
+            {
+                "pr": "13403",
+                "title": "reference files correctly",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/tools/playground/public/index.html"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13402",
+                "title": "Gizmos use TmpVectors and exposed materials",
+                "description": "fixes #13396 \r\n\r\n- Use TmpVector\r\n- expose materials so user can tweak them\r\n",
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Gizmos/axisDragGizmo.ts",
+                    "packages/dev/core/src/Gizmos/axisScaleGizmo.ts",
+                    "packages/dev/core/src/Gizmos/boundingBoxGizmo.ts",
+                    "packages/dev/core/src/Gizmos/gizmo.ts",
+                    "packages/dev/core/src/Gizmos/planeDragGizmo.ts",
+                    "packages/dev/core/src/Gizmos/planeRotationGizmo.ts",
+                    "packages/dev/core/src/Gizmos/scaleGizmo.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13352",
+                "title": "Physics V2 plugin iteration",
+                "description": "Minor updates to the plugin interface, physics debug viewer and small fixes.",
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Debug/physicsViewer.ts",
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts",
+                    "packages/dev/core/src/Physics/v2/physicsEngine.ts",
+                    "packages/dev/core/src/Physics/v2/physicsShape.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13397",
+                "title": "Hide teleportation mesh on creation",
+                "description": "This makes sure it is invisible even if the next XR frame throws an exception for any reason.",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/XR/features/WebXRControllerTeleportation.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13399",
+                "title": "Force the control's old rect position to be invalidated before moving",
+                "description": "This fixes an issue exposed by: https://github.com/BabylonJS/Babylon.js/pull/13372, where the control's previous rect was not invalidated and some remains of the rendering would be in the initial position:\r\n(Refer to https://playground.babylonjs.com/#FX4EEA#4) for an example\r\n![image](https://user-images.githubusercontent.com/6002144/210425124-332a9026-7105-49c6-a12a-a3a1debe87fd.png)\r\n",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/advancedDynamicTexture.ts",
+                    "packages/dev/gui/src/2D/controls/control.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13365",
+                "title": "Add a _internalMetadata to avoid side effects with metadata",
+                "description": "See https://forum.babylonjs.com/t/circular-dependency-issue-when-exporting-to-babylon-with-khr-materials-variants/35856\r\n\r\nThe glTF loader used to use `Node.metadata` / `BaseTexture.metadata` / `Material.metadata` for internal use, preventing serialization of corresponding objects in some cases.\r\n\r\nThere is now a new `_internalMetadata` property for `Node` / `BaseTexture` / `Material` for internal use only (this property is not serialized).",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Gizmos/boundingBoxGizmo.ts",
+                    "packages/dev/core/src/Materials/Textures/baseTexture.ts",
+                    "packages/dev/core/src/Materials/material.ts",
+                    "packages/dev/core/src/node.ts",
+                    "packages/dev/loaders/src/glTF/2.0/Extensions/KHR_materials_variants.ts",
+                    "packages/dev/loaders/src/glTF/2.0/glTFLoader.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "loaders"
+                ]
+            },
+            {
+                "pr": "13398",
+                "title": "Bump json5 from 1.0.1 to 1.0.2",
+                "description": "Bumps [json5](https://github.com/json5/json5) from 1.0.1 to 1.0.2.\n<details>\n<summary>Release notes</summary>\n<p><em>Sourced from <a href=\"https://github.com/json5/json5/releases\">json5's releases</a>.</em></p>\n<blockquote>\n<h2>v1.0.2</h2>\n<ul>\n<li>Fix: Properties with the name <code>__proto__</code> are added to objects and arrays. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/199\">#199</a>) This also fixes a prototype pollution vulnerability reported by Jonathan Gregson! (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/295\">#295</a>). This has been backported to v1. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/298\">#298</a>)</li>\n</ul>\n</blockquote>\n</details>\n<details>\n<summary>Changelog</summary>\n<p><em>Sourced from <a href=\"https://github.com/json5/json5/blob/main/CHANGELOG.md\">json5's changelog</a>.</em></p>\n<blockquote>\n<h3>Unreleased [<a href=\"https://github.com/json5/json5/tree/main\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.2.3...HEAD\">diff</a>]</h3>\n<h3>v2.2.3 [<a href=\"https://github.com/json5/json5/tree/v2.2.3\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.2.2...v2.2.3\">diff</a>]</h3>\n<ul>\n<li>Fix: json5@2.2.3 is now the 'latest' release according to npm instead of\nv1.0.2. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/299\">#299</a>)</li>\n</ul>\n<h3>v2.2.2 [<a href=\"https://github.com/json5/json5/tree/v2.2.2\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.2.1...v2.2.2\">diff</a>]</h3>\n<ul>\n<li>Fix: Properties with the name <code>__proto__</code> are added to objects and arrays.\n(<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/199\">#199</a>) This also fixes a prototype pollution vulnerability reported by\nJonathan Gregson! (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/295\">#295</a>).</li>\n</ul>\n<h3>v2.2.1 [<a href=\"https://github.com/json5/json5/tree/v2.2.1\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.2.0...v2.2.1\">diff</a>]</h3>\n<ul>\n<li>Fix: Removed dependence on minimist to patch CVE-2021-44906. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/266\">#266</a>)</li>\n</ul>\n<h3>v2.2.0 [<a href=\"https://github.com/json5/json5/tree/v2.2.0\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.1.3...v2.2.0\">diff</a>]</h3>\n<ul>\n<li>New: Accurate and documented TypeScript declarations are now included. There\nis no need to install <code>@types/json5</code>. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/236\">#236</a>, <a href=\"https://github-redirect.dependabot.com/json5/json5/issues/244\">#244</a>)</li>\n</ul>\n<h3>v2.1.3 [<a href=\"https://github.com/json5/json5/tree/v2.1.3\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.1.2...v2.1.3\">diff</a>]</h3>\n<ul>\n<li>Fix: An out of memory bug when parsing numbers has been fixed. (<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/228\">#228</a>,\n<a href=\"https://github-redirect.dependabot.com/json5/json5/issues/229\">#229</a>)</li>\n</ul>\n<h3>v2.1.2 [<a href=\"https://github.com/json5/json5/tree/v2.1.2\">code</a>, <a href=\"https://github.com/json5/json5/compare/v2.1.1...v2.1.2\">diff</a>]</h3>\n<!-- raw HTML omitted -->\n</blockquote>\n<p>... (truncated)</p>\n</details>\n<details>\n<summary>Commits</summary>\n<ul>\n<li><a href=\"https://github.com/json5/json5/commit/a62db1e51e1031d92ac260f5bb38bbed1fdbc754\"><code>a62db1e</code></a> 1.0.2</li>\n<li><a href=\"https://github.com/json5/json5/commit/e0c23fe458a77c0b2cdb271376be5d8d0908133c\"><code>e0c23fe</code></a> docs: update CHANGELOG for v1.0.2</li>\n<li><a href=\"https://github.com/json5/json5/commit/62a65408408d40aeea14c7869ed327acead12972\"><code>62a6540</code></a> fix: add <strong>proto</strong> to objects and arrays</li>\n<li>See full diff in <a href=\"https://github.com/json5/json5/compare/v1.0.1...v1.0.2\">compare view</a></li>\n</ul>\n</details>\n<br />\n\n\n[![Dependabot compatibility score](https://dependabot-badges.githubapp.com/badges/compatibility_score?dependency-name=json5&package-manager=npm_and_yarn&previous-version=1.0.1&new-version=1.0.2)](https://docs.github.com/en/github/managing-security-vulnerabilities/about-dependabot-security-updates#about-compatibility-scores)\n\nDependabot will resolve any conflicts with this PR as long as you don't alter it yourself. You can also trigger a rebase manually by commenting `@dependabot rebase`.\n\n[//]: # (dependabot-automerge-start)\n[//]: # (dependabot-automerge-end)\n\n---\n\n<details>\n<summary>Dependabot commands and options</summary>\n<br />\n\nYou can trigger Dependabot actions by commenting on this PR:\n- `@dependabot rebase` will rebase this PR\n- `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it\n- `@dependabot merge` will merge this PR after your CI passes on it\n- `@dependabot squash and merge` will squash and merge this PR after your CI passes on it\n- `@dependabot cancel merge` will cancel a previously requested merge and block automerging\n- `@dependabot reopen` will reopen this PR if it is closed\n- `@dependabot close` will close this PR and stop Dependabot recreating it. You can achieve the same result by closing it manually\n- `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot use these labels` will set the current labels as the default for future PRs for this repo and language\n- `@dependabot use these reviewers` will set the current reviewers as the default for future PRs for this repo and language\n- `@dependabot use these assignees` will set the current assignees as the default for future PRs for this repo and language\n- `@dependabot use this milestone` will set the current milestone as the default for future PRs for this repo and language\n\nYou can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/BabylonJS/Babylon.js/network/alerts).\n\n</details>",
+                "author": {
+                    "name": "dependabot[bot]",
+                    "url": "https://github.com/apps/dependabot"
+                },
+                "files": [
+                    "package-lock.json"
+                ],
+                "tags": [
+                    "dependencies"
+                ]
+            }
+        ],
+        "5.42.0": [
+            {
+                "pr": "13429",
+                "title": "Fix broken use of TmpVectors in BoundingBoxGizmo",
+                "description": "Follow up https://forum.babylonjs.com/t/bounding-box-rotation-in-gizmo-is-not-working/37245\r\n\r\n",
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Gizmos/axisScaleGizmo.ts",
+                    "packages/dev/core/src/Gizmos/boundingBoxGizmo.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "gizmos"
+                ]
+            },
+            {
+                "pr": "13388",
+                "title": "Cache loaded dom images on Image class so the playground-editor doesn't have to reload them often",
+                "description": "Without the change:\r\n![ge-no-cache](https://user-images.githubusercontent.com/6002144/209851133-13453ef9-8178-423f-9721-4dd7bbd53ca0.gif)\r\nWith the change:\r\n![ge-cache](https://user-images.githubusercontent.com/6002144/209851145-ac34937f-d94b-4ca1-af94-dc758257f1a8.gif)\r\n",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/image.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "gui editor"
+                ]
+            },
+            {
+                "pr": "13427",
+                "title": "Add location to glFragColor in WebGL preprocessor",
+                "description": "To simplify some specific uses of MultiRenderTarget it would be handy to have `layout(location = 0) prepended to the glFragColor output. Without this you cannot declare another output buffer as in OpenGL ES 3 all output locations must be specified.\r\n\r\nThis change shouldn't have any impact on typical use but makes it easier for custom MRT/Deferred shading situations.",
+                "author": {
+                    "name": "OrigamiDev-Pete",
+                    "url": "https://github.com/OrigamiDev-Pete"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/WebGL/webGL2ShaderProcessors.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13426",
+                "title": "Add dithering option to SkyMaterial",
+                "description": "Rel: https://forum.babylonjs.com/t/skymaterial-and-dithering/37221",
+                "author": {
+                    "name": "852Kerfunkle",
+                    "url": "https://github.com/852Kerfunkle"
+                },
+                "files": [
+                    "packages/dev/materials/src/sky/sky.fragment.fx",
+                    "packages/dev/materials/src/sky/skyMaterial.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13425",
+                "title": "Fix sound play function not accepting zero as a valid offset",
+                "description": "The `Sound.play` function is not accepting zero as a valid offset. This makes resetting the offset to zero not work after previously setting it to a non-zero value.\r\n\r\nReported on forum here: https://forum.babylonjs.com/t/pausing-and-playing-an-audio-with-offset-restarts-it-from-the-beginning-instead-of-the-current-position/36668/12\r\n\r\nThis change fixes the issue by comparing the given `offset` argument to `undefined` instead of using JavaScript truthy/falsey.\r\n\r\nThis bug was caused by the change I made in https://github.com/BabylonJS/Babylon.js/pull/13373.",
+                "author": {
+                    "name": "docEdub",
+                    "url": "https://github.com/docEdub"
+                },
+                "files": [
+                    "packages/dev/core/src/Audio/sound.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "audio"
+                ]
+            },
+            {
+                "pr": "13423",
+                "title": "ActionManager: Add support for Material in serialization and parsing",
+                "description": "See https://forum.babylonjs.com/t/how-to-parse-actions/37208",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Actions/action.ts",
+                    "packages/dev/core/src/Actions/actionManager.ts",
+                    "packages/dev/core/src/Actions/directActions.ts",
+                    "packages/dev/core/src/Materials/material.ts"
+                ],
+                "tags": [
+                    "materials",
+                    "new feature"
+                ]
+            },
+            {
+                "pr": "13421",
+                "title": "PBR material: Fix typo with OBJECTSPACE_NORMALMAP define",
+                "description": null,
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/PBR/pbrBaseMaterial.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13419",
+                "title": "Export gltf scene level metadata",
+                "description": "Fix #13417 ",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/serializers/src/glTF/2.0/glTFExporter.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "exporters",
+                    "glTF"
+                ]
+            },
+            {
+                "pr": "13418",
+                "title": "NME: Add a RealTime input",
+                "description": "See https://forum.babylonjs.com/t/node-material-animation-runs-slower-than-unity-shader-graph/37067/8",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/thinEngine.ts",
+                    "packages/dev/core/src/Materials/Node/Blocks/Input/animatedInputBlockTypes.ts",
+                    "packages/dev/core/src/Materials/Node/Blocks/Input/inputBlock.ts",
+                    "packages/tools/nodeEditor/src/blockTools.ts",
+                    "packages/tools/nodeEditor/src/components/nodeList/nodeListComponent.tsx",
+                    "packages/tools/nodeEditor/src/graphSystem/properties/inputNodePropertyComponent.tsx"
+                ],
+                "tags": [
+                    "new feature",
+                    "nme"
+                ]
+            },
+            {
+                "pr": "13415",
+                "title": "Fix LoadScriptAsync to reject with proper error",
+                "description": "See https://forum.babylonjs.com/t/importasyncmesh-on-server-side-without-scene/34151/39",
+                "author": {
+                    "name": "bghgary",
+                    "url": "https://github.com/bghgary"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/tools.ts"
+                ],
+                "tags": [
+                    "bug"
+                ]
+            },
+            {
+                "pr": "13414",
+                "title": "some API changes for fade in and out behavior",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Behaviors/Meshes/fadeInOutBehavior.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13401",
+                "title": "Prevent Uncaught Exception from `ThinEngine.runRenderLoop` when `window.SetTimeout` in not defined",
+                "description": "I am having an uncaught exception when using BaylonJs in a NodeJs environment because of a call to `window.setTimeout`.\r\n\r\nIt is not very clear in the code what is the standard, as sometime we call the global `setTimeout` and sometime we call `window.setTimeout`. \r\n\r\nMy take on this is that it should be ok to always call the globals `setTimeout`/ `clearTimeout` as they are bound to be defined and are the very same functions as `window.setTimeout`/ `window.clearTimeout` in most cases.\r\n\r\nThough this PR do not change them all. I just make some 2 files more consistent where we used to use a mix of both, and I updated the `ThinEngine.QueueNewFrame` to NOT call `window.setTimeout`, but to fall back on the global `setTimeout`.\r\n\r\n\r\nTo really be \"environment  independant\", we should never call a function that is \"environment  dependant\" directly, and put them all behind a configurable callback registry. This registry would be initialized with default values, and could be customizes by the user depending on its needs. But I'm not sure how it is doable, and anyway that's another story :)\r\n",
+                "author": {
+                    "name": "barroij",
+                    "url": "https://github.com/barroij"
+                },
+                "files": [
+                    "packages/dev/core/src/Audio/sound.ts",
+                    "packages/dev/core/src/Engines/thinEngine.ts",
+                    "packages/dev/inspector/src/components/actionTabs/tabs/propertyGrids/materials/textures/textureEditorComponent.tsx"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13413",
+                "title": "Added test for Dynamic Texture canvas context clip operation",
+                "description": "## Overview\r\n\r\nAdded small test for Dynamic Texture canvas context clip operation. Babylon Native will add a similar test, I'm adding it to Babylon.js to keep tests consistent between both projects. ",
+                "author": {
+                    "name": "SergioRZMasson",
+                    "url": "https://github.com/SergioRZMasson"
+                },
+                "files": [
+                    "packages/tools/tests/test/visualization/ReferenceImages/dynamicTextureClip.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13407",
+                "title": "Update meshopt_decoder.js to 0.18",
+                "description": "This brings us up to the latest decoder module for meshopt contents which includes Wasm binary updates and the removal of experimental console.log message that is no longer relevant.\r\n\r\nThe update makes decoding a little faster (~5%), and the module itself a little bigger (~5%) due to the use of new LLVM toolchain.\r\n\r\nThe extra download size, however, is just 287 bytes (gzip delta).\r\n\r\nRaw numbers (Ryzen 5900X, node.js 18.12, Linux):\r\n\r\nbefore:\r\n- decodeVertex 3.54 GB/s\r\n- decodeIndex 2.05 GB/s\r\n- raw size 21781 bytes\r\n- gzip size 5868 bytes\r\n\r\nafter:\r\n- decodeVertex 3.77 GB/s\r\n- decodeIndex 2.16 GB/s\r\n- raw size 23379 bytes\r\n- gzip size 6155 bytes\r\n\r\nThe file is copied verbatim from https://github.com/zeux/meshoptimizer/blob/v0.18/js/meshopt_decoder.js",
+                "author": {
+                    "name": "zeux",
+                    "url": "https://github.com/zeux"
+                },
+                "files": [
+                    "packages/tools/babylonServer/public/meshopt_decoder.js"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13411",
+                "title": "Fix 2 slider3D issues",
+                "description": "The mesh used by the slider had meshes set to pickable that should not be pickable.\nThere was also an issue disposing the material as the textures were not created during construction.\n\nSee https://forum.babylonjs.com/t/xr-motion-controller-unwanted-picking-of-3d-buttons-meshes/36056/14",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/gui/src/3D/controls/slider3D.ts",
+                    "packages/dev/gui/src/3D/materials/mrdl/mrdlSliderThumbMaterial.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "VR/AR/XR"
+                ]
+            },
+            {
+                "pr": "13389",
+                "title": "Add a fade out delay to FadeInOutBehavior",
+                "description": "Add a fade out delay and changes to make behavior work correctly when fadeIn is triggered while the mesh is already visible/invisible or in transition.",
+                "author": {
+                    "name": "ericwood73",
+                    "url": "https://github.com/ericwood73"
+                },
+                "files": [
+                    "packages/dev/core/src/Behaviors/Meshes/fadeInOutBehavior.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13406",
+                "title": "Prevent Uncaught Exception in NullEngine.dispose",
+                "description": "I am having an uncaught exception when using BaylonJs in a NodeJs environment because of a call to `window.removeEventListener` from NullEngine.dispose().\r\n\r\n\r\nThis PR adds extra checks to make that `addEventListener`/`removeEventListener` do exist and are functions before calling them.\r\n\r\nThis PR comes along with https://github.com/BabylonJS/Babylon.js/pull/13401 in order to improve BabylonJs usability in non-browser environment\r\n",
+                "author": {
+                    "name": "barroij",
+                    "url": "https://github.com/barroij"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/engine.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13408",
+                "title": "Improve pointerDragBehavior customization",
+                "description": "As the details in [Babylonjs forum](https://forum.babylonjs.com/t/change-accessibility-of-dragplane-in-pointerdragbehavior-class-to-protected-to-make-it-more-extendable/37082), I have a need to customize the `pointerDragBehavior` in such a way that will allow more customization in its inherited class and remove a pitfall on how  the dragging state was handled. In order to achieve that, there're a few changes I need to make:\r\n\r\n1. Change the visibility of `_dragPlane` field from private to protected to allow more customization in the inherited class.\r\n2. Force calling `releaseDrag` if the start dragging failed to prevent the freezing (not be able to drag) due to how the dragging state is handled\r\n3. Pass the information of the active pointer in the drag observables in addition to the `pointerId`, this is to let the user have  access to more information about the pointer and it especially useful when detecting the type of the event (e.g. click, touch)",
+                "author": {
+                    "name": "thongth",
+                    "url": "https://github.com/thongth"
+                },
+                "files": [
+                    "packages/dev/core/src/Behaviors/Meshes/pointerDragBehavior.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13410",
+                "title": "Properly notify textHighlightObservable",
+                "description": "Related issue: https://forum.babylonjs.com/t/gui-ontexthighlightobservable-callback-how-to/37128/2",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/inputText.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13409",
+                "title": "NME : Use flag IgnoreTexturesAtLoadTime in ReflectionTextureBaseBlock",
+                "description": "When creating ReflectionTextureBaseBlock from a JSON NME material, if the flag NodeMaterial.IgnoreTexturesAtLoadTime is activated, this pull request prevents texture loading.\r\n\r\nThis new behavior is similar to the ones already existing in TextureBlock, ImageSourceBlock or TriPlanarBlock.",
+                "author": {
+                    "name": "GMM-Monumento",
+                    "url": "https://github.com/GMM-Monumento"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/Node/Blocks/Dual/reflectionTextureBaseBlock.ts"
+                ],
+                "tags": []
+            }
+        ],
+        "5.40.1": [
+            {
+                "pr": "13395",
+                "title": "Allow loading unicode-based playgrounds in older versions",
+                "description": "There is sadly no way around it, as the function we are using was only introduced in 5.X, so 4.X playgrounds won't load correctly.",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/tools/playground/src/tools/loadManager.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13393",
+                "title": "Release 5.39.0 Has IPhysicsEnginePLugin Errors",
+                "description": "Fixes #13378\nThe UMD declaration combines all declarations in the core repo to a single file. The issue with that is that interfaces that have the same name collide.\nThis is a UMD-only issue.",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Debug/physicsViewer.ts",
+                    "packages/dev/core/src/Physics/IPhysicsEngine.ts",
+                    "packages/dev/core/src/Physics/physicsEngineComponent.ts",
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts",
+                    "packages/dev/core/src/Physics/v2/physicsConstraint.ts",
+                    "packages/dev/core/src/Physics/v2/physicsEngine.ts",
+                    "packages/dev/core/src/Physics/v2/physicsMaterial.ts",
+                    "packages/dev/core/src/Physics/v2/physicsShape.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13392",
+                "title": "Fix font style options on gui editor.",
+                "description": "Font style should follow the CSS spec: https://developer.mozilla.org/en-US/docs/Web/CSS/font-style, so it should be \"normal\" instead of regular.",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/tools/guiEditor/src/components/propertyTab/propertyGrids/gui/commonControlPropertyGridComponent.tsx"
+                ],
+                "tags": [
+                    "bug",
+                    "gui editor"
+                ]
+            },
+            {
+                "pr": "13385",
+                "title": "ShadowDepthWrapper: Remove unneeded code",
+                "description": "Closes #13381 ",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/shadowDepthWrapper.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13390",
+                "title": "TaskManager.addTextureTask: Fix doc",
+                "description": "See https://forum.babylonjs.com/t/texture-applies-incorrectly-but-refresh-button-helps/36984/2",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/assetsManager.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            }
+        ],
         "5.40.0": [
             {
                 "pr": "13386",
