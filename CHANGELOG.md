@@ -1,5 +1,85 @@
 # Changelog
 
+## 5.44.0
+
+### Core
+
+- InputManager: Fix for POINTERTAP firing during multi-touch gesture - [_Bug Fix_] by [PolygonalSun](https://github.com/PolygonalSun) ([#13466](https://github.com/BabylonJS/Babylon.js/pull/13466))
+- BaseCameraPointerInputs: Fixed logic to ignore extra touches - [_Bug Fix_] by [PolygonalSun](https://github.com/PolygonalSun) ([#13468](https://github.com/BabylonJS/Babylon.js/pull/13468))
+
+## 5.43.2
+
+### Core
+
+- Observable: Fix single fire events not working sometimes - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#13465](https://github.com/BabylonJS/Babylon.js/pull/13465))
+- Gradients on GUI - by [carolhmj](https://github.com/carolhmj) ([#13361](https://github.com/BabylonJS/Babylon.js/pull/13361))
+- Fluid Renderer: Fixes WebGPU support - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#13459](https://github.com/BabylonJS/Babylon.js/pull/13459))
+- Update assetContainer.ts - by [aWeirdo](https://github.com/aWeirdo) ([#13451](https://github.com/BabylonJS/Babylon.js/pull/13451))
+
+### GUI
+
+- Add forceResizeWidth on GUI Text Block to allow for width resize even… - by [carolhmj](https://github.com/carolhmj) ([#13460](https://github.com/BabylonJS/Babylon.js/pull/13460))
+- Gradients on GUI - by [carolhmj](https://github.com/carolhmj) ([#13361](https://github.com/BabylonJS/Babylon.js/pull/13361))
+
+### GUI Editor
+
+- Fixes to GUI Editor Zoom Behavior - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#13462](https://github.com/BabylonJS/Babylon.js/pull/13462))
+
+## 5.43.1
+
+### Core
+
+- Physics V2 Iteration 3 - by [CedricGuillemet](https://github.com/CedricGuillemet) ([#13450](https://github.com/BabylonJS/Babylon.js/pull/13450))
+- Fix Lines Mesh with Push Material - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#13457](https://github.com/BabylonJS/Babylon.js/pull/13457))
+- Fix Sound current time when pause is called, and refactor pause system - [_Bug Fix_] by [docEdub](https://github.com/docEdub) ([#13455](https://github.com/BabylonJS/Babylon.js/pull/13455))
+- Fix back-compat issue in physics (es6) - by [RaananW](https://github.com/RaananW) ([#13453](https://github.com/BabylonJS/Babylon.js/pull/13453))
+
+### GUI
+
+- Fix GUI Image caching to consider images that have been created but n… - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#13440](https://github.com/BabylonJS/Babylon.js/pull/13440))
+
+### Serializers
+
+- Optimizing performance of _BinaryWriter._resizeBuffer - by [myfreeer](https://github.com/myfreeer) ([#13456](https://github.com/BabylonJS/Babylon.js/pull/13456))
+
+## 5.43.0
+
+### Core
+
+- Fix memory leaks - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#13452](https://github.com/BabylonJS/Babylon.js/pull/13452))
+- Material: Make the frozen mode more user friendly - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#13437](https://github.com/BabylonJS/Babylon.js/pull/13437))
+- Better error handling in XR Hand constraint behavior - by [RaananW](https://github.com/RaananW) ([#13449](https://github.com/BabylonJS/Babylon.js/pull/13449))
+- Remove a 180 degree flip (an old relic) - by [RaananW](https://github.com/RaananW) ([#13448](https://github.com/BabylonJS/Babylon.js/pull/13448))
+- Fix Sound current time when stop is called while paused - [_Bug Fix_] by [docEdub](https://github.com/docEdub) ([#13444](https://github.com/BabylonJS/Babylon.js/pull/13444))
+- Add support for unsigned int uniform - by [newbeea](https://github.com/newbeea) ([#13433](https://github.com/BabylonJS/Babylon.js/pull/13433))
+- Fix Action Deserialization - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#13436](https://github.com/BabylonJS/Babylon.js/pull/13436))
+
+### GUI Editor
+
+- Pan torwards cursor when zooming on GUI Editor - by [carolhmj](https://github.com/carolhmj) ([#13387](https://github.com/BabylonJS/Babylon.js/pull/13387))
+
+### Serializers
+
+- Add support for instanced meshes in STLEXPORT - by [d-0-s-t](https://github.com/d-0-s-t) ([#13439](https://github.com/BabylonJS/Babylon.js/pull/13439))
+
+## 5.42.2
+
+### Core
+
+- Fixed issue when setting ViewPort multiple times per frame in Native - by [SergioRZMasson](https://github.com/SergioRZMasson) ([#13367](https://github.com/BabylonJS/Babylon.js/pull/13367))
+
+## 5.42.1
+
+### Core
+
+- Add touch release detection to draggable parts of BoundingBoxGizmo - by [Hsifnus](https://github.com/Hsifnus) ([#13428](https://github.com/BabylonJS/Babylon.js/pull/13428))
+- Fix broken sound offset backward compatibility - [_Bug Fix_] by [docEdub](https://github.com/docEdub) ([#13431](https://github.com/BabylonJS/Babylon.js/pull/13431))
+- GPUParticleSystem: Fix crash when update effect not ready - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#13432](https://github.com/BabylonJS/Babylon.js/pull/13432))
+
+### GUI
+
+- Fixes and performance improvement for linked GUI - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#13430](https://github.com/BabylonJS/Babylon.js/pull/13430))
+
 ## 5.42.0
 
 ### Core
