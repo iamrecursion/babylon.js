@@ -1562,6 +1562,15 @@
             "title": "Loading glTF model with KTX2 textures",
             "playgroundId": "#YD2TXP#35",
             "excludeFromAutomaticTesting": true
+        },
+        {
+            "title": "Instantiate Hierarchy", 
+            "playgroundId": "#BET11L"
+        },
+        {
+            "title": "Screen Space Reflections 2",
+            "playgroundId": "#PIZ1GK#977",
+            "excludedEngines": ["webgl1"]
         }
     ]
 }
