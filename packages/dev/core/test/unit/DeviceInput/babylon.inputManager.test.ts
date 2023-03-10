@@ -10,6 +10,7 @@ import { NullEngine } from "core/Engines";
 import type { Engine } from "core/Engines/engine";
 import type { IPointerEvent, IUIEvent } from "core/Events";
 import { PointerEventTypes } from "core/Events";
+import { InputManager } from "core/Inputs/scene.inputManager";
 import { Vector3 } from "core/Maths/math.vector";
 import { MeshBuilder } from "core/Meshes/meshBuilder";
 import { UtilityLayerRenderer } from "core/Rendering/utilityLayerRenderer";
@@ -428,7 +429,7 @@ describe("InputManager", () => {
     it("Does not fire POINTERTAP events during multi-touch gesture", () => {
         let tapCt = 0;
 
-        scene?.onPointerObservable.add((eventData) => {
+        scene?.onPointerObservable.add(() => {
             tapCt++;
         }, PointerEventTypes.POINTERTAP);
 
@@ -524,6 +525,93 @@ describe("InputManager", () => {
             }
         }
         expect(tapCt).toBe(1);
+    });
+
+    it("Doesn't fire onPointerOberservable for POINTERTAP when ExclusiveDoubleClickMode is enabled", async () => {
+        let tapCt = 0;
+        let dblTapCt = 0;
+
+        scene!.onPointerObservable.add(() => {
+            tapCt++;
+        }, PointerEventTypes.POINTERTAP);
+
+        scene!.onPointerObservable.add(() => {
+            dblTapCt++;
+        }, PointerEventTypes.POINTERDOUBLETAP);
+
+        if (deviceInputSystem) {
+            // Expect a single tap and double tap
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+
+            // Expect only a double tap
+            InputManager.ExclusiveDoubleClickMode = true;
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+
+            // Because the input manager uses the system clock, we need to use real timers
+            // and wait for the double click delay to pass so that we can work with a clean slate
+            jest.useRealTimers();
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Expect a single tap only
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+
+            // Wait for the double click delay to pass again
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Expect two single taps
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 0);
+
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Double click, immediately followed by a single click, should still fire a double click and a single click
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 0);
+
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Single click, immediately followed by a double click, should still fire a single click and a double click
+            // With no additional clicks
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Three single clicks alternating between left and right
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.RightClick, 0);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 1);
+            deviceInputSystem.changeInput(DeviceType.Mouse, 0, PointerInput.LeftClick, 0);
+
+            await new Promise((resolve) => setTimeout(resolve, InputManager.DoubleClickDelay + 1));
+
+            // Reset to fake timers
+            jest.useFakeTimers();
+        }
+        // Since this is static, we should reset it to false for other tests
+        InputManager.ExclusiveDoubleClickMode = false;
+
+        expect(tapCt).toBe(9);
+        expect(dblTapCt).toBe(4);
     });
 
     it("can fire onViewMatrixObservable on camera.update", () => {
