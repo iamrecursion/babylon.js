@@ -1054,7 +1054,7 @@
         },
         {
             "title": "Screen space reflections",
-            "playgroundId": "#PIZ1GK#172",
+            "playgroundId": "#PIZ1GK#1059",
             "referenceImage": "ssr.png",
             "renderCount": 10,
             "excludedEngines": ["webgl1"],
@@ -1583,6 +1583,15 @@
         {
             "title": "GUI Horizontal Stack Panel and Text Block with resizeToFit and forceResizeWidth",
             "playgroundId": "#XCPP9Y#17811"
+        },
+        {
+            "title": "Scene Recorder Apply Delta",
+            "playgroundId": "#9ZS92P#9"
+        },
+        {
+            "title": "Sprites Pixel Perfect",
+            "playgroundId": "#ZX8DJ3#10",
+            "excludedEngines": ["webgl1"]
         }
     ]
 }

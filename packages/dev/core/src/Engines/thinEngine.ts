@@ -222,14 +222,14 @@ export class ThinEngine {
      */
     // Not mixed with Version for tooling purpose.
     public static get NpmPackage(): string {
-        return "babylonjs@5.50.1";
+        return "babylonjs@5.52.0";
     }
 
     /**
      * Returns the current version of the framework
      */
     public static get Version(): string {
-        return "5.50.1";
+        return "5.52.0";
     }
 
     /**
@@ -1194,6 +1194,7 @@ export class ThinEngine {
             vertexArrayObject: false,
             instancedArrays: false,
             textureLOD: this._webGLVersion > 1 || this._gl.getExtension("EXT_shader_texture_lod") ? true : false,
+            texelFetch: this._webGLVersion !== 1,
             blendMinMax: false,
             multiview: this._gl.getExtension("OVR_multiview2"),
             oculusMultiview: this._gl.getExtension("OCULUS_multiview"),

@@ -1,6 +1,548 @@
 {
-    "fromTag": "5.50.0",
+    "fromTag": "5.51.0",
     "changelog": {
+        "5.52.0": [
+            {
+                "pr": "13621",
+                "title": "Improved SSAO2 when samples <16. Added more control over SSAO2 denoising filter.",
+                "description": "Related to this thread in the forums:\r\nhttps://forum.babylonjs.com/t/ssao2-blur-shader-issues/38924/25\r\n\r\n## SSAO calculation fix\r\nFixes an error in SSAO2 calculations that caused massive amounts of incorrect occlusions on flat surfaces when samples were <16. This change is automatically applied with the new `epsilon` parameter defaulting to 0.02, demonstrated below with samples = 8 (fixed on the right). Setting the new parameter to 0.0 will revert back to the old behavior.\r\n\r\nSee #13652 for discussions and more screenshots.\r\n\r\n#### Terrain (#N96NXC#127)\r\n<img src=\"https://user-images.githubusercontent.com/984279/226774799-e9c31bac-3701-42e3-b7ac-787d005ca85b.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226774815-c77ae725-930e-4bb3-ac6e-3b1ea2669862.png\" width=50% height=50%>\r\n\r\n#### Cat (#T3K2SA#1)\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775071-8d1056be-688b-4026-b31c-807259ae2464.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775079-5fd547b9-0daf-43b6-a522-d04ebef5e986.png\" width=50% height=50%>\r\n\r\n#### Room (#LCUPCU#14)\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775164-10d8d6fa-8717-470f-9196-cf6c6312735d.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775175-3cc2ca52-6de8-4ec2-b085-e93f8c9b4ab0.png\" width=50% height=50%>\r\n\r\n## Denoising / Blur filter is more configurable\r\n\r\nThe \"expensiveBlur\" filter has been improved with new features and their associated parameters. \r\n\r\nThis change was done with care so that the new code keeps all the quirks and bugs in the current code, while adding options to mitigate them on a per scene/project basis. This was none of the existing deployments are affected since they might have already tried to compensate for them in other ways.\r\n\r\n### Summary of changes\r\n- Adds option to disable the blur filters for easier tuning of the SSAO2 parameters.\r\n- Made the \"expensive filter\" configurable (number of samples, shape of kernel, tolerance when rejecting samples) while keeping the defaults to be exactly like before the PR.\r\n- Exposed the new settings in the Inspector.\r\n- Cleaned up the code, reducing rather big code duplication.\r\n- Added and updated comments and documentation.\r\n- Added some optimizations based on feedback from @Popov72.\r\n\r\n\r\n\r\nThis is the first time I contribute to Babylon.js, so please let me know if I need to do or change something.",
+                "author": {
+                    "name": "fooware",
+                    "url": "https://github.com/fooware"
+                },
+                "files": [
+                    "packages/dev/core/src/PostProcesses/RenderPipeline/Pipelines/ssao2RenderingPipeline.ts",
+                    "packages/dev/core/src/Shaders/ssao2.fragment.fx",
+                    "packages/dev/inspector/src/components/actionTabs/tabs/propertyGrids/postProcesses/ssao2RenderingPipelinePropertyGridComponent.tsx"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13659",
+                "title": "Add shouldExportAnimation option on GLTF exporter to filter out animations",
+                "description": "This add the possibility of the user choosing which animations will be in the exported GLTF.\r\n\r\nRelated forum issue: https://forum.babylonjs.com/t/how-to-exclude-all-disabled-nodes-from-export/38780/9",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/serializers/src/glTF/2.0/glTFAnimation.ts",
+                    "packages/dev/serializers/src/glTF/2.0/glTFExporter.ts",
+                    "packages/dev/serializers/src/glTF/2.0/glTFSerializer.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "exporters",
+                    "glTF"
+                ]
+            },
+            {
+                "pr": "13652",
+                "title": "Improved SSAO2 for sample count <16",
+                "description": "### Summary\r\nThis fix massively improves SSAO2 when using low sample counts, like the default 8.\r\n\r\n### Background\r\nIt was discovered as part of PR #13621 but is submitted as a new PR since 13621 is now all about adding control over the SSAO2 denoiser without changing anything by default.\r\n\r\nThis small change however is so massively positive in all the tests I have done that it shouldn't be left out by default but be considered a bugfix.\r\n\r\n### How it works\r\nThe fix is rather simple. When calculating if sample X is occluded by sample Y in the SSAO2 calculations we considered everything with a depth difference of 0 (zero) to mean Y occludes X. However, this does not take any calculation or precision errors into account, which causes samples along a \"flat\" surface to occlude each other. Basically, the flat surface was occluding itself...\r\n\r\nThis fix adds an epsilon of sorts to the calculation. The value 0.02 was selected from testing and gave the best improvements on all tests I did and at the same time practically left the 16-sample case untouched.\r\n\r\nThat said, on hardware that doesn't have the same precision in the shaders. might benefit from a higher threshold, as would some scenes like the kitchen example. But going over 0.02 starts to affect samples >=16 which isn't great from a backward compatibility standpoint.\r\n\r\nI did not make this into a tunable setting, since I don't expect that a user of Babylon.js would understand how it affects the shader calculations. This should just work.\r\n\r\n### Test results\r\nIn the screenshots below, the \"8x\" part denotes how many SSAO2 samples were used, old version is on the left and the new one is on the right.\r\n\r\nNotice how the fixed version is pretty similar to the 16x reference when the sample count goes down. But the old version goes bananas with incorrect occlusions everywhere. Also note that the two versions at sample count 16 are basically identical.\r\n\r\nThe images were saved without the blur-stage of the SSAO2 filter active, to better show the SSAO2 calculations.\r\n\r\n#### Terrain (#N96NXC#127)\r\n#### 16x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226774831-d85b9050-f1a5-403f-b6e1-61c529454576.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226774837-3371b66a-8158-41f7-9493-54516b75bfe0.png\" width=50% height=50%>\r\n#### 12x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226774821-04e478ad-0486-4ce0-88f3-146cc7ac9f03.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226774826-deb8ec49-c573-4166-b68c-de79fd5faa61.png\" width=50% height=50%>\r\n#### 8x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226774799-e9c31bac-3701-42e3-b7ac-787d005ca85b.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226774815-c77ae725-930e-4bb3-ac6e-3b1ea2669862.png\" width=50% height=50%>\r\n##### 4x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226774770-2c835b0b-c975-49d6-a2f4-c72c59e6e2bf.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226774781-d8046245-0d5a-43e8-959a-b79192d560de.png\" width=50% height=50%>\r\n#### Cat (#T3K2SA#1)\r\n#### 16x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775114-4eab9d30-243c-445c-a9db-69cafb4517a0.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775121-f5b54df1-141d-4831-8009-1f3e2aee28bb.png\" width=50% height=50%>\r\n#### 12x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775087-7ef5ae1e-e915-4390-812f-aa0a41782c78.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775098-6b8ffcfb-b956-467b-b155-aa106f895384.png\" width=50% height=50%>\r\n#### 8x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775071-8d1056be-688b-4026-b31c-807259ae2464.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775079-5fd547b9-0daf-43b6-a522-d04ebef5e986.png\" width=50% height=50%>\r\n#### 4x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775032-6614547a-cad3-4077-90f2-17bcbfc34af0.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775055-e2c308b5-40e6-4979-928d-92f59f63b055.png\" width=50% height=50%>\r\n\r\n### Room (#LCUPCU#14)\r\n#### 16x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775203-f00eba22-9625-43e4-8a00-cd200fb2290d.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775212-ecc1247d-c586-49a6-a7f7-d1ddf87eebe5.png\" width=50% height=50%>\r\n#### 12x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775185-70b1209f-f7d3-48f6-af15-4c0c31c0a733.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775193-69fd1987-2ed4-41e2-9c62-6947fc1c2868.png\" width=50% height=50%>\r\n#### 8x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775164-10d8d6fa-8717-470f-9196-cf6c6312735d.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775175-3cc2ca52-6de8-4ec2-b085-e93f8c9b4ab0.png\" width=50% height=50%>\r\n#### 4x\r\n<img src=\"https://user-images.githubusercontent.com/984279/226775145-d4bee5a3-56e4-458d-b4f0-e8a5940f22ac.png\" width=50% height=50%><img src=\"https://user-images.githubusercontent.com/984279/226775153-79bf0883-3a7b-4c54-bc70-9863eae0eaff.png\" width=50% height=50%>\r\n",
+                "author": {
+                    "name": "fooware",
+                    "url": "https://github.com/fooware"
+                },
+                "files": [
+                    "packages/dev/core/src/Shaders/ssao2.fragment.fx"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13654",
+                "title": "collision observable",
+                "description": null,
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13655",
+                "title": "Observable: Fix wrong value returned by hasObservers",
+                "description": "See https://forum.babylonjs.com/t/observable-hasobservers-can-incorrectly-report-false-even-though-there-are-observers/39232/2",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/observable.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "design"
+                ]
+            },
+            {
+                "pr": "13657",
+                "title": "Add iridescence configuration to PBR material cloning",
+                "description": "Add serialize decorators to boundingBox properties on CubeTexture\r\n\r\nRelated forum issue: https://forum.babylonjs.com/t/problem-cloning-pbrmaterial-with-iridescence-subconfiguration/39240",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/PBR/pbrMaterial.ts",
+                    "packages/dev/core/src/Materials/Textures/cubeTexture.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "materials"
+                ]
+            },
+            {
+                "pr": "13640",
+                "title": "Check if the node exists before adding to the list of nodes to sort.",
+                "description": "This is to cover a case that @auberryberry found\r\n\r\nYou can check this version to see if it doesn't break your GLB 😄 ",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/core/src/assetContainer.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "assets"
+                ]
+            },
+            {
+                "pr": "13641",
+                "title": "Improve how we delete massive group of animatables from animationgroup",
+                "description": "https://forum.babylonjs.com/t/animationgroup-stop-very-slow-if-there-are-a-lot-of-animatables/39099",
+                "author": {
+                    "name": "deltakosh",
+                    "url": "https://github.com/deltakosh"
+                },
+                "files": [
+                    "packages/dev/core/src/Animations/animatable.ts",
+                    "packages/dev/core/src/Animations/animationGroup.ts",
+                    "packages/dev/core/src/Animations/runtimeAnimation.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "animations"
+                ]
+            },
+            {
+                "pr": "13645",
+                "title": "Physics Update 11",
+                "description": null,
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsAggregate.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts",
+                    "packages/dev/core/src/Physics/v2/physicsEngineComponent.ts",
+                    "packages/dev/core/src/Physics/v2/physicsMaterial.ts",
+                    "packages/dev/core/src/Physics/v2/physicsShape.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13648",
+                "title": "Allow local dev using IPs",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/tools/guiEditor/public/index.js",
+                    "packages/tools/nodeEditor/public/index.js",
+                    "packages/tools/playground/public/index.js",
+                    "packages/tools/sandbox/public/index.js"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13646",
+                "title": "GPU particle system: Fix problem when using color gradients",
+                "description": "See https://forum.babylonjs.com/t/gpu-particles-freezing-meshes-texture-problem/39187/1",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Particles/gpuParticleSystem.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "particles"
+                ]
+            },
+            {
+                "pr": "13638",
+                "title": "NME SceneDepthBlock: Add support for storeCameraSpaceZ property",
+                "description": "See https://forum.babylonjs.com/t/force-field-node-material-using-unity-tutorial-help-needed-to-translate-it-to-babylon/39160\r\n",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/Node/Blocks/Dual/sceneDepthBlock.ts",
+                    "packages/dev/core/src/Materials/Node/nodeMaterialDecorator.ts",
+                    "packages/dev/core/src/Rendering/depthRenderer.ts",
+                    "packages/dev/core/src/Rendering/depthRendererSceneComponent.ts",
+                    "packages/tools/nodeEditor/src/graphSystem/properties/genericNodePropertyComponent.tsx"
+                ],
+                "tags": [
+                    "new feature",
+                    "nme"
+                ]
+            },
+            {
+                "pr": "13642",
+                "title": "Fix env texture creation from gamma space",
+                "description": "https://forum.babylonjs.com/t/convert-jpgeg-or-hdr-to-env/39096",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/environmentTextureTools.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "texture"
+                ]
+            },
+            {
+                "pr": "13636",
+                "title": "Sprites: Add pixel perfect mode",
+                "description": "See https://forum.babylonjs.com/t/sprite-pixel-art-artifact-issue/39123/3",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Shaders/sprites.fragment.fx",
+                    "packages/dev/core/src/Sprites/spriteManager.ts",
+                    "packages/dev/core/src/Sprites/spriteRenderer.ts",
+                    "packages/tools/tests/test/visualization/ReferenceImages/Sprites Pixel Perfect.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "new feature",
+                    "sprite"
+                ]
+            },
+            {
+                "pr": "13639",
+                "title": "Clear an extra 1-pixel border around the virtual puck",
+                "description": "This avoids a clear issue with the puck when it is moving. See: https://forum.babylonjs.com/t/virtual-joystick-resize-issue/39196",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/virtualJoystick.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13637",
+                "title": "Button3D: Allow setting the dimensions at creation time",
+                "description": "See https://forum.babylonjs.com/t/holographicbutton-button3d-sizes/39134/3\r\n\r\nThe dimensions can be set at creation time only because it has an impact on the creation of the mesh. I would have to recreate the mesh if we allowed the dimensions to be changed at any time, but `_createNode` (which creates the mesh) is called by `Control3D`, and the result of that call is stored in a private variable. If the user wants to change the dimensions afterwards, he will have to recreate the button.",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/gui/src/3D/controls/button3D.ts",
+                    "packages/dev/gui/src/3D/controls/contentDisplay3D.ts"
+                ],
+                "tags": [
+                    "gui",
+                    "new feature"
+                ]
+            },
+            {
+                "pr": "13634",
+                "title": "Fix a condition in _moveToProjectedPosition causing bugs with linked TextBlocks",
+                "description": "Related forum issue: https://forum.babylonjs.com/t/glitches-with-textblocks-not-wrapped-in-container/39092",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/control.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            }
+        ],
+        "5.51.0": [
+            {
+                "pr": "13631",
+                "title": "SSR2: more improvements",
+                "description": "Add new features and fix some bugs.",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/engineCapabilities.ts",
+                    "packages/dev/core/src/Engines/nativeEngine.ts",
+                    "packages/dev/core/src/Engines/nullEngine.ts",
+                    "packages/dev/core/src/Engines/thinEngine.ts",
+                    "packages/dev/core/src/Engines/webgpuEngine.ts",
+                    "packages/dev/core/src/PostProcesses/RenderPipeline/Pipelines/ssrRenderingPipeline.ts",
+                    "packages/dev/core/src/Rendering/geometryBufferRenderer.ts",
+                    "packages/dev/core/src/Rendering/prePassRenderer.ts",
+                    "packages/dev/core/src/Shaders/ShadersInclude/screenSpaceRayTrace.fx",
+                    "packages/dev/core/src/Shaders/geometry.fragment.fx",
+                    "packages/dev/core/src/Shaders/screenSpaceReflection2.fragment.fx",
+                    "packages/dev/core/src/Shaders/screenSpaceReflection2Blur.fragment.fx",
+                    "packages/dev/core/src/Shaders/screenSpaceReflection2BlurCombiner.fragment.fx",
+                    "packages/dev/inspector/src/components/actionTabs/lines/textureLinkLineComponent.tsx",
+                    "packages/dev/inspector/src/components/actionTabs/tabs/propertyGridTabComponent.tsx",
+                    "packages/dev/inspector/src/components/actionTabs/tabs/propertyGrids/postProcesses/ssrRenderingPipelinePropertyGridComponent.tsx",
+                    "packages/dev/inspector/src/components/sceneExplorer/sceneExplorerComponent.tsx",
+                    "packages/tools/tests/test/visualization/ReferenceImages/Screen Space Reflections 2.png",
+                    "packages/tools/tests/test/visualization/ReferenceImages/ssr.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13632",
+                "title": "Bump webpack from 5.75.0 to 5.76.0",
+                "description": "Bumps [webpack](https://github.com/webpack/webpack) from 5.75.0 to 5.76.0.\n<details>\n<summary>Release notes</summary>\n<p><em>Sourced from <a href=\"https://github.com/webpack/webpack/releases\">webpack's releases</a>.</em></p>\n<blockquote>\n<h2>v5.76.0</h2>\n<h2>Bugfixes</h2>\n<ul>\n<li>Avoid cross-realm object access by <a href=\"https://github.com/Jack-Works\"><code>@​Jack-Works</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16500\">webpack/webpack#16500</a></li>\n<li>Improve hash performance via conditional initialization by <a href=\"https://github.com/lvivski\"><code>@​lvivski</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16491\">webpack/webpack#16491</a></li>\n<li>Serialize <code>generatedCode</code> info to fix bug in asset module cache restoration by <a href=\"https://github.com/ryanwilsonperkin\"><code>@​ryanwilsonperkin</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16703\">webpack/webpack#16703</a></li>\n<li>Improve performance of <code>hashRegExp</code> lookup by <a href=\"https://github.com/ryanwilsonperkin\"><code>@​ryanwilsonperkin</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16759\">webpack/webpack#16759</a></li>\n</ul>\n<h2>Features</h2>\n<ul>\n<li>add <code>target</code> to <code>LoaderContext</code> type by <a href=\"https://github.com/askoufis\"><code>@​askoufis</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16781\">webpack/webpack#16781</a></li>\n</ul>\n<h2>Security</h2>\n<ul>\n<li><a href=\"https://github.com/advisories/GHSA-3rfm-jhwj-7488\">CVE-2022-37603</a> fixed by <a href=\"https://github.com/akhilgkrishnan\"><code>@​akhilgkrishnan</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16446\">webpack/webpack#16446</a></li>\n</ul>\n<h2>Repo Changes</h2>\n<ul>\n<li>Fix HTML5 logo in README by <a href=\"https://github.com/jakebailey\"><code>@​jakebailey</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16614\">webpack/webpack#16614</a></li>\n<li>Replace TypeScript logo in README by <a href=\"https://github.com/jakebailey\"><code>@​jakebailey</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16613\">webpack/webpack#16613</a></li>\n<li>Update actions/cache dependencies by <a href=\"https://github.com/piwysocki\"><code>@​piwysocki</code></a> in <a href=\"https://redirect.github.com/webpack/webpack/pull/16493\">webpack/webpack#16493</a></li>\n</ul>\n<h2>New Contributors</h2>\n<ul>\n<li><a href=\"https://github.com/Jack-Works\"><code>@​Jack-Works</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16500\">webpack/webpack#16500</a></li>\n<li><a href=\"https://github.com/lvivski\"><code>@​lvivski</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16491\">webpack/webpack#16491</a></li>\n<li><a href=\"https://github.com/jakebailey\"><code>@​jakebailey</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16614\">webpack/webpack#16614</a></li>\n<li><a href=\"https://github.com/akhilgkrishnan\"><code>@​akhilgkrishnan</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16446\">webpack/webpack#16446</a></li>\n<li><a href=\"https://github.com/ryanwilsonperkin\"><code>@​ryanwilsonperkin</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16703\">webpack/webpack#16703</a></li>\n<li><a href=\"https://github.com/piwysocki\"><code>@​piwysocki</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16493\">webpack/webpack#16493</a></li>\n<li><a href=\"https://github.com/askoufis\"><code>@​askoufis</code></a> made their first contribution in <a href=\"https://redirect.github.com/webpack/webpack/pull/16781\">webpack/webpack#16781</a></li>\n</ul>\n<p><strong>Full Changelog</strong>: <a href=\"https://github.com/webpack/webpack/compare/v5.75.0...v5.76.0\">https://github.com/webpack/webpack/compare/v5.75.0...v5.76.0</a></p>\n</blockquote>\n</details>\n<details>\n<summary>Commits</summary>\n<ul>\n<li><a href=\"https://github.com/webpack/webpack/commit/97b1718720c33f1b17302a74c5284b01e02ec001\"><code>97b1718</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16781\">#16781</a> from askoufis/loader-context-target-type</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/b84efe6224b276bf72e4c5e2f4e76acddfaeef07\"><code>b84efe6</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16759\">#16759</a> from ryanwilsonperkin/real-content-hash-regex-perf</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/c98e9e001441b165c7ed4845700839730b505833\"><code>c98e9e0</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16493\">#16493</a> from piwysocki/patch-1</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/5f34acfbc074da6cc09f48944d7f2b4273ffb3f8\"><code>5f34acf</code></a> feat: Add <code>target</code> to <code>LoaderContext</code> type</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/b7fc4d876deb958d7ee81ecc00a312e39a354a44\"><code>b7fc4d8</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16703\">#16703</a> from ryanwilsonperkin/ryanwilsonperkin/fix-16160</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/63ea82da4d4e4242b6a6285fc937f0684f264fe8\"><code>63ea82d</code></a> Merge branch 'webpack:main' into patch-1</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/4ba225225b1348c8776ca5b5fe53468519413bc0\"><code>4ba2252</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16446\">#16446</a> from akhilgkrishnan/patch-1</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/1acd6350be3d74d4ac70b64cbbc60f27724b618b\"><code>1acd635</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16613\">#16613</a> from jakebailey/ts-logo</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/302eb37fe19ed7ca60eaf895aca4f9da9dfd7931\"><code>302eb37</code></a> Merge pull request <a href=\"https://redirect.github.com/webpack/webpack/issues/16614\">#16614</a> from jakebailey/html5-logo</li>\n<li><a href=\"https://github.com/webpack/webpack/commit/cfdb1dfe59b33bf7441b8a8e4fc58d75e4f54cee\"><code>cfdb1df</code></a> Improve performance of hashRegExp lookup</li>\n<li>Additional commits viewable in <a href=\"https://github.com/webpack/webpack/compare/v5.75.0...v5.76.0\">compare view</a></li>\n</ul>\n</details>\n<details>\n<summary>Maintainer changes</summary>\n<p>This version was pushed to npm by <a href=\"https://www.npmjs.com/~evilebottnawi\">evilebottnawi</a>, a new releaser for webpack since your current version.</p>\n</details>\n<br />\n\n\n[![Dependabot compatibility score](https://dependabot-badges.githubapp.com/badges/compatibility_score?dependency-name=webpack&package-manager=npm_and_yarn&previous-version=5.75.0&new-version=5.76.0)](https://docs.github.com/en/github/managing-security-vulnerabilities/about-dependabot-security-updates#about-compatibility-scores)\n\nDependabot will resolve any conflicts with this PR as long as you don't alter it yourself. You can also trigger a rebase manually by commenting `@dependabot rebase`.\n\n[//]: # (dependabot-automerge-start)\n[//]: # (dependabot-automerge-end)\n\n---\n\n<details>\n<summary>Dependabot commands and options</summary>\n<br />\n\nYou can trigger Dependabot actions by commenting on this PR:\n- `@dependabot rebase` will rebase this PR\n- `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it\n- `@dependabot merge` will merge this PR after your CI passes on it\n- `@dependabot squash and merge` will squash and merge this PR after your CI passes on it\n- `@dependabot cancel merge` will cancel a previously requested merge and block automerging\n- `@dependabot reopen` will reopen this PR if it is closed\n- `@dependabot close` will close this PR and stop Dependabot recreating it. You can achieve the same result by closing it manually\n- `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself)\n- `@dependabot use these labels` will set the current labels as the default for future PRs for this repo and language\n- `@dependabot use these reviewers` will set the current reviewers as the default for future PRs for this repo and language\n- `@dependabot use these assignees` will set the current assignees as the default for future PRs for this repo and language\n- `@dependabot use this milestone` will set the current milestone as the default for future PRs for this repo and language\n\nYou can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/BabylonJS/Babylon.js/network/alerts).\n\n</details>",
+                "author": {
+                    "name": "dependabot[bot]",
+                    "url": "https://github.com/apps/dependabot"
+                },
+                "files": [
+                    "package-lock.json"
+                ],
+                "tags": [
+                    "dependencies"
+                ]
+            },
+            {
+                "pr": "13627",
+                "title": "adt.useInvalidateRectOptimization using scale incorrectly when toggling visibility and redrawing invalidated parts of canvas",
+                "description": "Fixes #13622\nCurrent measure already has the right measure. when applying the transform again it applies scale twice.",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/container.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13625",
+                "title": "Fix pointer out event on 3D GUI in XR (mobile ar)",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/gui/src/3D/gui3DManager.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13626",
+                "title": "On SceneRecorder, use the same parsing method as the decorators to en…",
+                "description": "…sure that it accounts for properties serialized with different names.\r\n\r\nRelated forum issue: https://forum.babylonjs.com/t/scenerecorder-not-applying-every-change/19120/9",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/decorators.ts",
+                    "packages/dev/core/src/Misc/sceneRecorder.ts",
+                    "packages/tools/tests/test/visualization/ReferenceImages/Scene Recorder Apply Delta.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13628",
+                "title": "Adds: keysRotateUp/keysRotateDown (Free Camera)",
+                "description": "Possibility to rotate Free Camera up and down using the keyboard. \r\n\r\nhttps://forum.babylonjs.com/t/free-camera-rotation-keys-cameras-feature-reques/38891",
+                "author": {
+                    "name": "Nawarius",
+                    "url": "https://github.com/Nawarius"
+                },
+                "files": [
+                    "packages/dev/core/src/Cameras/Inputs/freeCameraKeyboardMoveInput.ts",
+                    "packages/dev/core/src/Cameras/freeCamera.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "inputs"
+                ]
+            },
+            {
+                "pr": "13629",
+                "title": "Disable Flaky ExclusiveDoubleClickMode test",
+                "description": "The \"Doesn't fire onPointerOberservable for POINTERTAP when ExclusiveDoubleClickMode is enabled\" is acting flaky.  Since the test coverage for this is unrelated to most scenarios, this test will temporarily be disabled until it can be fixed so that other PRs aren't blocked.",
+                "author": {
+                    "name": "PolygonalSun",
+                    "url": "https://github.com/PolygonalSun"
+                },
+                "files": [
+                    "packages/dev/core/test/unit/DeviceInput/babylon.inputManager.test.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13630",
+                "title": "Dragging a port and dropping on the same port throws a console error …",
+                "description": "…on the NME",
+                "author": {
+                    "name": "deltakosh",
+                    "url": "https://github.com/deltakosh"
+                },
+                "files": [
+                    "packages/tools/nodeEditor/src/graphSystem/connectionPointPortData.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "nme"
+                ]
+            },
+            {
+                "pr": "13624",
+                "title": "Import fix for UMD modules typing",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13623",
+                "title": "Stl Loader Less Restrictive",
+                "description": "https://forum.babylonjs.com/t/error-with-loading-only-certain-stl-meshes/38984",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/loaders/src/STL/stlFileLoader.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "loaders"
+                ]
+            },
+            {
+                "pr": "13620",
+                "title": "KTX container: Improve error handling when texture format not supported",
+                "description": "Fix https://github.com/BabylonJS/Babylon.js/issues/13619",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Misc/khronosTextureContainer.ts"
+                ],
+                "tags": [
+                    "new feature",
+                    "texture"
+                ]
+            },
+            {
+                "pr": "13617",
+                "title": "SSAO2: Fix expensive blur that could not be disabled",
+                "description": "See https://forum.babylonjs.com/t/ssao2-blur-shader-issues/38924/3",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/PostProcesses/RenderPipeline/Pipelines/ssao2RenderingPipeline.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "post-process"
+                ]
+            },
+            {
+                "pr": "13618",
+                "title": "Fixing an issue with follow camera and physics",
+                "description": "In certain cases the absolute position is re-set, but the world matrix is cached, so it doesn't update when calling computeWorldMatrix.\nThis force-updates the absolutePosition vector\n\nThis solves this PG - https://playground.babylonjs.com/#0V7KM3#10 . Pressing \"w\" will present the issue",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Cameras/targetCamera.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "physics"
+                ]
+            },
+            {
+                "pr": "13582",
+                "title": "InputManager: Modified Logic for ExclusiveDoubleClickMode For Click/DoubleClick Mutual Exclusivity",
+                "description": "In a previous PR, there was a fix done to the logic for handling the ExclusiveDoubleClickMode flag to omit single clicks when this flag was active.  This fix was done in error based off of a misinterpretation of the original comment for the flag.  This PR fixes the logic and further clarifies the full behavior when this flag is active.  Test has also been updated to properly test this.\r\n\r\nPrevious PR: https://github.com/BabylonJS/Babylon.js/pull/13577",
+                "author": {
+                    "name": "PolygonalSun",
+                    "url": "https://github.com/PolygonalSun"
+                },
+                "files": [
+                    "packages/dev/core/src/Inputs/scene.inputManager.ts",
+                    "packages/dev/core/test/unit/DeviceInput/babylon.inputManager.test.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "inputs"
+                ]
+            },
+            {
+                "pr": "13616",
+                "title": "Leak Fix",
+                "description": "https://forum.babylonjs.com/t/assetcontainer-memory-leak/38843/5",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/Meshes/mesh.ts",
+                    "packages/dev/core/src/Meshes/mesh.vertexData.ts",
+                    "packages/dev/core/src/Morph/morphTargetManager.ts",
+                    "packages/dev/core/src/assetContainer.ts",
+                    "packages/dev/loaders/src/glTF/2.0/glTFLoader.ts",
+                    "packages/dev/loaders/src/glTF/glTFFileLoader.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "memory leak"
+                ]
+            }
+        ],
         "5.50.1": [
             {
                 "pr": "13615",
