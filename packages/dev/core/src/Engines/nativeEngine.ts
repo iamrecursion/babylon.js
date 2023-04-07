@@ -265,6 +265,7 @@ export class NativeEngine extends Engine {
             supportTransformFeedbacks: false,
             textureMaxLevel: false,
             texture2DArrayMaxLayerCount: _native.Engine.CAPS_LIMITS_MAX_TEXTURE_LAYERS,
+            disableMorphTargetTexture: false,
         };
 
         this._features = {
@@ -2080,6 +2081,7 @@ export class NativeEngine extends Engine {
         let format = Constants.TEXTUREFORMAT_RGBA;
         let useSRGBBuffer = false;
         let samples = 1;
+        let label: string | undefined;
         if (options !== undefined && typeof options === "object") {
             generateMipMaps = !!options.generateMipMaps;
             type = options.type === undefined ? Constants.TEXTURETYPE_UNSIGNED_INT : options.type;
@@ -2087,6 +2089,7 @@ export class NativeEngine extends Engine {
             format = options.format === undefined ? Constants.TEXTUREFORMAT_RGBA : options.format;
             useSRGBBuffer = options.useSRGBBuffer === undefined ? false : options.useSRGBBuffer;
             samples = options.samples ?? 1;
+            label = options.label;
         } else {
             generateMipMaps = !!options;
         }
@@ -2132,6 +2135,7 @@ export class NativeEngine extends Engine {
         texture.samplingMode = samplingMode;
         texture.type = type;
         texture.format = format;
+        texture.label = label;
 
         this._internalTexturesCache.push(texture);
 
@@ -2145,13 +2149,13 @@ export class NativeEngine extends Engine {
         let generateStencilBuffer = false;
         let noColorAttachment = false;
         let colorAttachment: InternalTexture | undefined = undefined;
-        //let samples = 1;
+        let samples = 1;
         if (options !== undefined && typeof options === "object") {
             generateDepthBuffer = options.generateDepthBuffer ?? true;
             generateStencilBuffer = !!options.generateStencilBuffer;
             noColorAttachment = !!options.noColorAttachment;
             colorAttachment = options.colorAttachment;
-            //samples = options.samples ?? 1;
+            samples = options.samples ?? 1;
         }
 
         const texture = colorAttachment || (noColorAttachment ? null : this._createInternalTexture(size, options, true, InternalTextureSource.RenderTarget));
@@ -2172,10 +2176,19 @@ export class NativeEngine extends Engine {
 
         rtWrapper.setTextures(texture);
 
-        // TODO: handle this in native
-        //this.updateRenderTargetTextureSampleCount(rtWrapper, samples);
+        this.updateRenderTargetTextureSampleCount(rtWrapper, samples);
 
         return rtWrapper;
+    }
+
+    // This function is being added for the sole purpose of overriding the ThinEngine version.  The reason
+    // for this is that the ThinEngine version of this function uses a WebGL2RenderingContext, which is not
+    // available in Babylon Native.  The return value is just a hard-coded value that is not used anywhere
+    // in Babylon Native's code.  This is effectively a hack/workaround so that Babylon Native doesn't crash
+    // This function should be updated once the maxMSAASamples is updated as well.
+    public updateRenderTargetTextureSampleCount(rtWrapper: RenderTargetWrapper, samples: number): number {
+        // TODO: Implement this function once the maxMSAASamples is updated.
+        return 1;
     }
 
     public updateTextureSamplingMode(samplingMode: number, texture: InternalTexture): void {

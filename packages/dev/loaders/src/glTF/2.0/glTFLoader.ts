@@ -1064,9 +1064,9 @@ export class GLTFLoader implements IGLTFLoader {
             promises.push(
                 this._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
                     if (babylonVertexBuffer.getKind() === VertexBuffer.PositionKind && !this.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
-                        const mmin = accessor.min as [number, number, number],
-                            mmax = accessor.max as [number, number, number];
-                        if (mmin !== undefined && mmax !== undefined) {
+                        if (accessor.min && accessor.max) {
+                            const min = TmpVectors.Vector3[0].copyFromFloats(...(accessor.min as [number, number, number]));
+                            const max = TmpVectors.Vector3[1].copyFromFloats(...(accessor.max as [number, number, number]));
                             if (accessor.normalized && accessor.componentType !== AccessorComponentType.FLOAT) {
                                 let divider = 1;
                                 switch (accessor.componentType) {
@@ -1083,15 +1083,10 @@ export class GLTFLoader implements IGLTFLoader {
                                         divider = 65535.0;
                                         break;
                                 }
-                                for (let i = 0; i < 3; ++i) {
-                                    mmin[i] = Math.max(mmin[i] / divider, -1.0);
-                                    mmax[i] = Math.max(mmax[i] / divider, -1.0);
-                                }
+                                const oneOverDivider = 1 / divider;
+                                min.scaleInPlace(oneOverDivider);
+                                max.scaleInPlace(oneOverDivider);
                             }
-                            const min = TmpVectors.Vector3[0],
-                                max = TmpVectors.Vector3[1];
-                            min.copyFromFloats(...mmin);
-                            max.copyFromFloats(...mmax);
                             babylonGeometry._boundingInfo = new BoundingInfo(min, max);
                             babylonGeometry.useBoundingInfoFromGeometry = true;
                         }
@@ -1907,7 +1902,10 @@ export class GLTFLoader implements IGLTFLoader {
         return this._loadAccessorAsync(context, accessor, Float32Array) as Promise<Float32Array>;
     }
 
-    private _loadIndicesAccessorAsync(context: string, accessor: IAccessor): Promise<IndicesArray> {
+    /**
+     * @internal
+     */
+    public _loadIndicesAccessorAsync(context: string, accessor: IAccessor): Promise<IndicesArray> {
         if (accessor.type !== AccessorType.SCALAR) {
             throw new Error(`${context}/type: Invalid value ${accessor.type}`);
         }
@@ -1937,7 +1935,10 @@ export class GLTFLoader implements IGLTFLoader {
         return accessor._data as Promise<IndicesArray>;
     }
 
-    private _loadVertexBufferViewAsync(bufferView: IBufferView): Promise<Buffer> {
+    /**
+     * @internal
+     */
+    public _loadVertexBufferViewAsync(bufferView: IBufferView): Promise<Buffer> {
         if (bufferView._babylonBuffer) {
             return bufferView._babylonBuffer;
         }
@@ -1950,7 +1951,10 @@ export class GLTFLoader implements IGLTFLoader {
         return bufferView._babylonBuffer;
     }
 
-    private _loadVertexAccessorAsync(context: string, accessor: IAccessor, kind: string): Promise<VertexBuffer> {
+    /**
+     * @internal
+     */
+    public _loadVertexAccessorAsync(context: string, accessor: IAccessor, kind: string): Promise<VertexBuffer> {
         if (accessor._babylonVertexBuffer?.[kind]) {
             return accessor._babylonVertexBuffer[kind];
         }
