@@ -1,6 +1,738 @@
 {
-    "fromTag": "5.53.1",
+    "fromTag": "5.57.1",
     "changelog": {
+        "5.57.1": [
+            {
+                "pr": "13749",
+                "title": "Physics Iteration 13",
+                "description": "A big portion of this change has already been reviewed.",
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Meshes/abstractMesh.ts",
+                    "packages/dev/core/src/Meshes/thinInstanceMesh.ts",
+                    "packages/dev/core/src/Physics/physicsEngineComponent.ts",
+                    "packages/dev/core/src/Physics/physicsHelper.ts",
+                    "packages/dev/core/src/Physics/physicsRaycastResult.ts",
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsAggregate.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts",
+                    "packages/dev/core/src/Physics/v2/physicsConstraint.ts",
+                    "packages/dev/core/src/Physics/v2/physicsEngine.ts",
+                    "packages/dev/core/src/Physics/v2/physicsEngineComponent.ts",
+                    "packages/dev/core/src/Physics/v2/physicsShape.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13750",
+                "title": "ShadowGenerator: improve performance",
+                "description": null,
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Lights/Shadows/shadowGenerator.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13748",
+                "title": "no premature result mutation for Vec2.rotateToRef",
+                "description": "for next case:\r\n```\r\nconst vec = new Vector2(offsetX, offsetY);\r\nvec.rotateToRef(angle, vec);\r\n```",
+                "author": {
+                    "name": "nekochanoide",
+                    "url": "https://github.com/nekochanoide"
+                },
+                "files": [
+                    "packages/dev/core/src/Maths/math.vector.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13747",
+                "title": "Update typo in solidParticleSystem.ts",
+                "description": null,
+                "author": {
+                    "name": "steambap",
+                    "url": "https://github.com/steambap"
+                },
+                "files": [
+                    "packages/dev/core/src/Particles/solidParticleSystem.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13743",
+                "title": "Round values coming from grid width calculation to avoid gaps between…",
+                "description": "… consecutive cells\r\n\r\nRelated forum issue: ",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/grid.ts",
+                    "packages/tools/tests/test/visualization/ReferenceImages/Rounding cell widths on Grid.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13746",
+                "title": "Fix GLTF export of ambient texture with texture transforms",
+                "description": "Related forum issue: https://forum.babylonjs.com/t/gltf2export-glbasync-missing-uv-scale-on-ambienttexture/39900",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/serializers/src/glTF/2.0/glTFMaterialExporter.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "glTF",
+                    "texture"
+                ]
+            }
+        ],
+        "6.0.0": [
+            {
+                "pr": "13759",
+                "title": "small fix for aggregate",
+                "description": null,
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/physicsAggregate.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13758",
+                "title": "Small fix for webxr declaration (consistency)",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/LibDeclarations/webxr.d.ts"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13757",
+                "title": "Export for UMD",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/index.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13755",
+                "title": "Physics iteration15",
+                "description": null,
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/Plugins/havokPlugin.ts",
+                    "packages/dev/core/src/Physics/v2/Plugins/index.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13756",
+                "title": "More Playground Changes",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/tools/playground/public/index.js",
+                    "packages/tools/playground/src/components/rendererComponent.tsx"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13754",
+                "title": "Prepare playground for 6.0.0",
+                "description": null,
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/tools/babylonServer/public/havok/HavokPhysics.wasm",
+                    "packages/tools/babylonServer/public/havok/HavokPhysics_umd.js",
+                    "packages/tools/babylonServer/public/havok/LICENSE",
+                    "packages/tools/playground/public/debug.html",
+                    "packages/tools/playground/public/frame.html",
+                    "packages/tools/playground/public/full.html",
+                    "packages/tools/playground/public/index.html",
+                    "packages/tools/playground/src/components/rendererComponent.tsx",
+                    "packages/tools/sandbox/public/index.html"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13752",
+                "title": "Physics iteration14",
+                "description": null,
+                "author": {
+                    "name": "CedricGuillemet",
+                    "url": "https://github.com/CedricGuillemet"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/physicsRaycastResult.ts",
+                    "packages/dev/core/src/Physics/v2/IPhysicsEnginePlugin.ts",
+                    "packages/dev/core/src/Physics/v2/physicsAggregate.ts",
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts",
+                    "packages/dev/core/src/Physics/v2/physicsConstraint.ts",
+                    "packages/dev/core/src/Physics/v2/physicsShape.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13751",
+                "title": "WebGPU: MultiRenderTarget extended support",
+                "description": "It's the WebGPU update corresponding to #13435 for WebGL2.",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/WebGPU/Extensions/engine.multiRender.ts",
+                    "packages/dev/core/src/Engines/WebGPU/webgpuHardwareTexture.ts",
+                    "packages/dev/core/src/Engines/WebGPU/webgpuTextureHelper.ts",
+                    "packages/dev/core/src/Engines/webgpuEngine.ts",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "new feature",
+                    "WebGPU"
+                ]
+            }
+        ],
+        "5.57.0": [
+            {
+                "pr": "13745",
+                "title": "Compute shader: Fix wrong ubo bound to the shader in some cases",
+                "description": "See https://forum.babylonjs.com/t/passing-a-primitive-variable-to-a-compute-shader-that-runs-multiple-times-per-frame/39904/3",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Compute/computeShader.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "WebGPU"
+                ]
+            },
+            {
+                "pr": "13742",
+                "title": "Clip planes defines perf",
+                "description": "Revert v5 factorization changes as they seem to be harmful to the V8 optimizer.",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/Layers/effectLayer.ts",
+                    "packages/dev/core/src/Lights/Shadows/shadowGenerator.ts",
+                    "packages/dev/core/src/Materials/clipPlaneMaterialHelper.ts",
+                    "packages/dev/core/src/Materials/shaderMaterial.ts",
+                    "packages/dev/core/src/Particles/gpuParticleSystem.ts",
+                    "packages/dev/core/src/Particles/particleSystem.ts",
+                    "packages/dev/core/src/Rendering/depthRenderer.ts",
+                    "packages/dev/core/src/Rendering/geometryBufferRenderer.ts",
+                    "packages/dev/core/src/Rendering/outlineRenderer.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13744",
+                "title": "Adding no-op setters to instancedMesh",
+                "description": "See https://forum.babylonjs.com/t/typeerror-cannot-set-property-visibility-of-object-object-which-has-only-a-getter/39723/7?u=raananw",
+                "author": {
+                    "name": "RaananW",
+                    "url": "https://github.com/RaananW"
+                },
+                "files": [
+                    "packages/dev/core/src/Meshes/instancedMesh.ts"
+                ],
+                "tags": [
+                    "bug"
+                ]
+            },
+            {
+                "pr": "13741",
+                "title": "BoundingInfo: Fix encapsulateBoundingInfo method",
+                "description": "See https://forum.babylonjs.com/t/bounding-info-encapsulation/39894/2",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Culling/boundingInfo.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "math"
+                ]
+            }
+        ],
+        "5.56.0": [
+            {
+                "pr": "13740",
+                "title": "Engine: Rollback changes because of perf problems",
+                "description": "Revert changes from #12952 because of performance problems.",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/WebGL/webGLPipelineContext.ts",
+                    "packages/dev/core/src/Materials/effect.ts"
+                ],
+                "tags": [
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13738",
+                "title": "Fix Imports",
+                "description": "Fix https://github.com/BabylonJS/Babylon.js/pull/13624#issuecomment-1506874467",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/Physics/v2/physicsBody.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "physics"
+                ]
+            },
+            {
+                "pr": "13737",
+                "title": "HDRFiltering: Fix final cube texture not having the right type",
+                "description": "[This PG](https://playground.babylonjs.com/#064AUB#71) generates some warnings:\r\n\r\n![image](https://user-images.githubusercontent.com/4152247/231767335-648c3450-d7b4-4dfa-8493-b8e67a49278a.png)\r\n\r\nand the spherical polynomials are not computed correctly because of the bug.",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Materials/Textures/Filtering/hdrFiltering.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13739",
+                "title": "CascadedShadowMaps: Allows setting min and max number of cascades",
+                "description": null,
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Lights/Shadows/cascadedShadowGenerator.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "shadows"
+                ]
+            },
+            {
+                "pr": "13734",
+                "title": "Highlight layer: Fix wrong stencil state",
+                "description": "See https://forum.babylonjs.com/t/stencil-buffer-set-wrong-in-highlightlayer-excluded-meshes-after-render/39839",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Layers/highlightLayer.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13736",
+                "title": "Post Process: Add a property to clear the buffer even when alpha blending is enabled",
+                "description": "See https://forum.babylonjs.com/t/adding-a-background-image-that-is-not-affected-by-the-default-rendering-pipeline-post-processes/34494/5",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/PostProcesses/postProcess.ts"
+                ],
+                "tags": [
+                    "new feature",
+                    "post-process"
+                ]
+            },
+            {
+                "pr": "13735",
+                "title": "fix import path",
+                "description": "https://forum.babylonjs.com/t/gltf-serializer-broken/39837",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/serializers/src/glTF/2.0/glTFSerializer.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "exporters"
+                ]
+            },
+            {
+                "pr": "13733",
+                "title": "Sprite manager: Force the sampling mode in pixel perfect mode",
+                "description": "See https://forum.babylonjs.com/t/sprite-pixel-art-artifact-issue/39123/13",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Sprites/spriteManager.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "sprite"
+                ]
+            }
+        ],
+        "5.55.0": [
+            {
+                "pr": "13732",
+                "title": "Prevent previous element props to be selected",
+                "description": "https://forum.babylonjs.com/t/inspector-broken-if-add-sprite-and-remove-it/39824/3",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/inspector/src/components/sceneExplorer/sceneExplorerComponent.tsx"
+                ],
+                "tags": [
+                    "bug",
+                    "inspector"
+                ]
+            },
+            {
+                "pr": "13726",
+                "title": "remove beta flag from GUI Editor",
+                "description": null,
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/tools/guiEditor/src/components/commandBarComponent.tsx"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13731",
+                "title": "MeshUVSpaceRenderer: Remove static",
+                "description": null,
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Meshes/meshUVSpaceRenderer.ts"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13715",
+                "title": "Pass clipContent/clipChildren down to Grid's internal containers",
+                "description": "Related forum issue: https://forum.babylonjs.com/t/clipped-text-while-creating-tree-view-using-grid/38890/8",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/gui/src/2D/controls/control.ts",
+                    "packages/dev/gui/src/2D/controls/grid.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13728",
+                "title": "GPU particle system: Fix particles not rendered in water PG",
+                "description": "See https://forum.babylonjs.com/t/gpuparticle-cannot-be-displayed-in-scene-with-watermaterial/39773/3\r\n",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Particles/gpuParticleSystem.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "particles"
+                ]
+            },
+            {
+                "pr": "13729",
+                "title": "glTF exporter: Fix warning message",
+                "description": "Fixes #13723 ",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/serializers/src/glTF/2.0/glTFMaterialExporter.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "exporters"
+                ]
+            },
+            {
+                "pr": "13724",
+                "title": "Round up ideal width/height calculations so no control is cut off",
+                "description": "Related forum issue: https://forum.babylonjs.com/t/gui-adapt-tochildren-using-rounded-values-adaptive-scaling/29333",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    ".vscode/launch.json",
+                    "packages/dev/gui/src/2D/valueAndUnit.ts",
+                    "packages/tools/tests/test/visualization/ReferenceImages/Rounding values on controls inside StackPanel.png",
+                    "packages/tools/tests/test/visualization/config.json"
+                ],
+                "tags": [
+                    "bug",
+                    "gui"
+                ]
+            },
+            {
+                "pr": "13725",
+                "title": "Add option to keep context menu entries open, but close them by default.",
+                "description": "Related forum issue: https://forum.babylonjs.com/t/inspector-close-the-context-menu-after-click-by-item/39668",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/core/src/Debug/debugLayer.ts",
+                    "packages/dev/inspector/src/components/sceneExplorer/extensionsComponent.tsx"
+                ],
+                "tags": [
+                    "enhancement",
+                    "inspector"
+                ]
+            },
+            {
+                "pr": "13721",
+                "title": "Inspector. Add custom items to context menus or override them",
+                "description": "Example of new options, here we can add new menu items:\r\n```\r\nscene.debugLayer.show({\r\n    contextMenu: {\r\n        pipeline: [\r\n            {\r\n                label: \"Add new Custom pipeline\",\r\n                action: (e: any) => console.log(\">>> Custom action\", e),\r\n            },\r\n        ],\r\n        node: [\r\n            {\r\n                label: \"Add new Custom node\",\r\n                action: (e: any) => console.log(\">>> Custom action\", e),\r\n            },\r\n        ],\r\n        materials: [\r\n            {\r\n                label: \"Add new Custom material\",\r\n                action: (e: any) => console.log(\">>> Custom action\", e),\r\n            },\r\n        ],\r\n        particleSystems: [\r\n            {\r\n                label: \"Add new Custom particle system\",\r\n                action: (e: any) => console.log(\">>> Custom action\", e),\r\n            },\r\n        ],\r\n        spriteManagers: [\r\n            {\r\n                label: \"Add new Custom sprite manager\",\r\n                action: (e: any) => console.log(\">>> Custom action\", e),\r\n            },\r\n        ],\r\n    },\r\n});\r\n```\r\n\r\nOr even override default items by this way:\r\n```\r\nscene.debugLayer.show({\r\n    contextMenuOverride: [\"pipeline\", \"node\", \"materials\", \"particleSystems\", \"spriteManagers\"],\r\n    contextMenu: {\r\n```\r\n\r\nHere we pass the list of menus that should be overwriten by custom items.",
+                "author": {
+                    "name": "Dok11",
+                    "url": "https://github.com/Dok11"
+                },
+                "files": [
+                    "packages/dev/core/src/Debug/debugLayer.ts",
+                    "packages/dev/inspector/src/components/sceneExplorer/sceneExplorerComponent.tsx",
+                    "packages/dev/inspector/src/components/sceneExplorer/treeItemComponent.tsx",
+                    "packages/dev/inspector/src/inspector.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "inspector"
+                ]
+            },
+            {
+                "pr": "13722",
+                "title": "Update NOTICE.md",
+                "description": null,
+                "author": {
+                    "name": "querielo",
+                    "url": "https://github.com/querielo"
+                },
+                "files": [
+                    "NOTICE.md"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13720",
+                "title": "Fix asset Container crash with predicate",
+                "description": "https://forum.babylonjs.com/t/assetcontainer-crash-in-instantiatemodelstoscene-when-using-predicate/39699",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/LibDeclarations/webgpu.d.ts",
+                    "packages/dev/core/src/assetContainer.ts"
+                ],
+                "tags": [
+                    "bug",
+                    "assets"
+                ]
+            },
+            {
+                "pr": "13719",
+                "title": "Inspector. Custom context menu for additional nodes",
+                "description": "https://forum.babylonjs.com/t/inpsector-add-a-custom-context-menu-to-additional-nodes/39672/4?u=dok11",
+                "author": {
+                    "name": "Dok11",
+                    "url": "https://github.com/Dok11"
+                },
+                "files": [
+                    "packages/dev/inspector/src/components/sceneExplorer/treeItemSpecializedComponent.tsx"
+                ],
+                "tags": []
+            },
+            {
+                "pr": "13717",
+                "title": "Morph targets: Workaround for Mali-G72 and morph target texture",
+                "description": "See https://forum.babylonjs.com/t/morph-targets-on-samsung-s9-exynos-9810-is-broken/32701/52",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Engines/engineCapabilities.ts",
+                    "packages/dev/core/src/Engines/nativeEngine.ts",
+                    "packages/dev/core/src/Engines/nullEngine.ts",
+                    "packages/dev/core/src/Engines/thinEngine.ts",
+                    "packages/dev/core/src/Engines/webgpuEngine.ts",
+                    "packages/dev/core/src/Morph/morphTargetManager.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13714",
+                "title": "update inspector readme",
+                "description": "Remove outdated instructions and add links to the documentation page.",
+                "author": {
+                    "name": "carolhmj",
+                    "url": "https://github.com/carolhmj"
+                },
+                "files": [
+                    "packages/dev/inspector/README.md"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            },
+            {
+                "pr": "13708",
+                "title": "Add overrideRenderingFillMode property to Mesh",
+                "description": "Supersedes https://github.com/BabylonJS/Babylon.js/pull/13688\r\n\r\nAs discussed in forum thread here: https://forum.babylonjs.com/t/add-mesh-overridematerialfillmode/39475/\r\n\r\ncc @MiikaH to review\r\n\r\nThe main difference is use the override only within the rendering scope as the flag is only used as a visual tool. It also fixes some of the scene override levels inconsistencies.",
+                "author": {
+                    "name": "sebavan",
+                    "url": "https://github.com/sebavan"
+                },
+                "files": [
+                    "packages/dev/core/src/Layers/effectLayer.ts",
+                    "packages/dev/core/src/Meshes/mesh.ts",
+                    "packages/dev/core/src/Rendering/depthPeelingRenderer.ts",
+                    "packages/dev/serializers/src/glTF/2.0/glTFExporter.ts"
+                ],
+                "tags": [
+                    "enhancement",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13716",
+                "title": "Fluid renderer: Fix alpha not preserved",
+                "description": "See https://forum.babylonjs.com/t/fluidrenderer-background-color-with-alpha/38831/2",
+                "author": {
+                    "name": "Popov72",
+                    "url": "https://github.com/Popov72"
+                },
+                "files": [
+                    "packages/dev/core/src/Shaders/fluidRenderingRender.fragment.fx"
+                ],
+                "tags": [
+                    "bug",
+                    "rendering engine"
+                ]
+            },
+            {
+                "pr": "13713",
+                "title": "docs: Fix a few typos",
+                "description": "There are small typos in:\n- packages/dev/proceduralTextures/readme.md\n- what's new.md\n\nFixes:\n- Should read `namespace` rather than `namepsace`.\n- Should read `json file` rather than `sjonfile`.\n- Should read `cascaded` rather than `cascacaded`.\n\n\n\nSemi-automated pull request generated by\nhttps://github.com/timgates42/meticulous/blob/master/docs/NOTE.md",
+                "author": {
+                    "name": "timgates42",
+                    "url": "https://github.com/timgates42"
+                },
+                "files": [
+                    "packages/dev/proceduralTextures/readme.md",
+                    "what's new.md"
+                ],
+                "tags": [
+                    "skip changelog"
+                ]
+            }
+        ],
         "5.54.0": [
             {
                 "pr": "13707",

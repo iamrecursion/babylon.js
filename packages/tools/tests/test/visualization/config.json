@@ -1575,8 +1575,8 @@
         },
         {
             "title": "MultiRenderTarget with different texture types",
-            "playgroundId": "#XSNYAU#1",
-            "excludedEngines": ["webgl1", "webgpu"]
+            "playgroundId": "#XSNYAU#22",
+            "excludedEngines": ["webgl1"]
         },
         {
             "title": "Decal Map", 
@@ -1598,6 +1598,14 @@
             "title": "Sprites Pixel Perfect",
             "playgroundId": "#ZX8DJ3#10",
             "excludedEngines": ["webgl1"]
+        },
+        {
+            "title": "Rounding values on controls inside StackPanel",
+            "playgroundId": "#XCPP9Y#18325"
+        },
+        {
+            "title": "Rounding cell widths on Grid",
+            "playgroundId": "#PQ4G5G#2"
         }
     ]
 }

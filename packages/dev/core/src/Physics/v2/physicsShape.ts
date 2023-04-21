@@ -1,10 +1,10 @@
 import type { TransformNode } from "../../Meshes/transformNode";
 import type { AbstractMesh } from "../../Meshes/abstractMesh";
 import type { BoundingBox } from "../../Culling/boundingBox";
-import { ShapeType } from "./IPhysicsEnginePlugin";
+import { PhysicsShapeType } from "./IPhysicsEnginePlugin";
 import type { IPhysicsEnginePluginV2, PhysicsShapeParameters } from "./IPhysicsEnginePlugin";
 import type { PhysicsMaterial } from "./physicsMaterial";
-import { Vector3, Quaternion } from "../../Maths/math.vector";
+import { Matrix, Vector3, Quaternion, TmpVectors } from "../../Maths/math.vector";
 
 import type { Mesh } from "../../Meshes/mesh";
 import type { Scene } from "../../scene";
@@ -16,7 +16,7 @@ export interface PhysicShapeOptions {
     /**
      * The type of the shape. This can be one of the following: SPHERE, BOX, CAPSULE, CYLINDER, CONVEX_HULL, MESH, HEIGHTFIELD, CONTAINER
      */
-    type?: ShapeType;
+    type?: PhysicsShapeType;
     /**
      * The parameters of the shape. Varies depending of the shape type.
      */
@@ -42,7 +42,7 @@ export class PhysicsShape {
      */
     private _physicsPlugin: IPhysicsEnginePluginV2;
 
-    private _type: ShapeType;
+    private _type: PhysicsShapeType;
 
     private _material: PhysicsMaterial;
 
@@ -87,28 +87,66 @@ export class PhysicsShape {
     }
 
     /**
+     * Returns the string "PhysicsShape".
+     * @returns "PhysicsShape"
+     */
+    public getClassName() {
+        return "PhysicsShape";
+    }
+
+    /**
      *
      */
-    public get type(): ShapeType {
+    public get type(): PhysicsShapeType {
         return this._type;
     }
 
     /**
+     * Set the membership mask of a shape. This is a bitfield of arbitrary
+     * "categories" to which the shape is a member. This is used in combination
+     * with the collide mask to determine if this shape should collide with
+     * another.
      *
-     * @param layer
+     * @param membershipMask Bitfield of categories of this shape.
      */
-    public set filterLayer(layer: number) {
-        this._physicsPlugin.setFilterLayer(this, layer);
+    public set filterMembershipMask(membershipMask: number) {
+        this._physicsPlugin.setShapeFilterMembershipMask(this, membershipMask);
+    }
+
+    /**
+     * Get the membership mask of a shape.
+     * @returns Bitmask of categories which this shape is a member of.
+     */
+    public get filterMembershipMask(): number {
+        return this._physicsPlugin.getShapeFilterMembershipMask(this);
+    }
+
+    /**
+     * Sets the collide mask of a shape. This is a bitfield of arbitrary
+     * "categories" to which this shape collides with. Given two shapes,
+     * the engine will check if the collide mask and membership overlap:
+     * shapeA.filterMembershipMask & shapeB.filterCollideMask
+     *
+     * If this value is zero (i.e. shapeB only collides with categories
+     * which shapeA is _not_ a member of) then the shapes will not collide.
+     *
+     * Note, the engine will also perform the same test with shapeA and
+     * shapeB swapped; the shapes will not collide if either shape has
+     * a collideMask which prevents collision with the other shape.
+     *
+     * @param collideMask Bitmask of categories this shape should collide with
+     */
+    public set filterCollideMask(collideMask: number) {
+        this._physicsPlugin.setShapeFilterCollideMask(this, collideMask);
     }
 
     /**
      *
-     * @returns
+     * @returns Bitmask of categories that this shape should collide with
      */
-    public get filterLayer(): number {
-        return this._physicsPlugin.getFilterLayer(this);
+    public get filterCollideMask(): number {
+        return this._physicsPlugin.getShapeFilterCollideMask(this);
     }
-
     /**
      *
      * @param material
@@ -142,12 +180,35 @@ export class PhysicsShape {
     }
 
     /**
+     * Utility to add a child shape to this container,
+     * automatically computing the relative transform between
+     * the container shape and the child instance.
      *
-     * @param newChild
-     * @param childTransform
+     * @param parentTransform The transform node associated with this shape
+     * @param newChild The new PhysicsShape to add
+     * @param childTransform The transform node associated with the child shape
      */
-    public addChild(newChild: PhysicsShape, childTransform: TransformNode): void {
-        this._physicsPlugin.addChild(this, newChild, childTransform);
+    public addChildFromParent(parentTransform: TransformNode, newChild: PhysicsShape, childTransform: TransformNode): void {
+        const childToWorld = childTransform.computeWorldMatrix(true);
+        const parentToWorld = parentTransform.computeWorldMatrix(true);
+        const childToParent = TmpVectors.Matrix[0];
+        childToWorld.multiplyToRef(Matrix.Invert(parentToWorld), childToParent);
+        const translation = TmpVectors.Vector3[0];
+        const rotation = TmpVectors.Quaternion[0];
+        const scale = TmpVectors.Vector3[1];
+        childToParent.decompose(scale, rotation, translation);
+        this._physicsPlugin.addChild(this, newChild, translation, rotation, scale);
+    }
+
+    /**
+     * Adds a child shape to a container with an optional transform
+     * @param newChild The new PhysicsShape to add
+     * @param translation Optional position of the child shape relative to this shape
+     * @param rotation Optional rotation of the child shape relative to this shape
+     * @param scale Optional scale of the child shape relative to this shape
+     */
+    public addChild(newChild: PhysicsShape, translation?: Vector3, rotation?: Quaternion, scale?: Vector3): void {
+        this._physicsPlugin.addChild(this, newChild, translation, rotation, scale);
     }
 
     /**
@@ -185,7 +246,6 @@ export class PhysicsShape {
  * Helper object to create a sphere shape
  */
 export class PhysicsShapeSphere extends PhysicsShape {
-    /** @internal */
     /**
      * Constructor for the Sphere Shape
      * @param center local center of the sphere
@@ -193,7 +253,7 @@ export class PhysicsShapeSphere extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(center: Vector3, radius: number, scene: Scene) {
-        super({ type: ShapeType.SPHERE, parameters: { center: center, radius: radius } }, scene);
+        super({ type: PhysicsShapeType.SPHERE, parameters: { center: center, radius: radius } }, scene);
     }
 
     /**
@@ -203,9 +263,9 @@ export class PhysicsShapeSphere extends PhysicsShape {
      */
     static FromMesh(mesh: AbstractMesh) {
         const bounds = mesh.getBoundingInfo();
-        //<todo.eoin We don't use bounding sphere because the results seem to be wrong
-        const centerLocal = bounds.boundingBox.center;
-        const radius = bounds.boundingBox.extendSize.x;
+        const centerLocal = bounds.boundingSphere.center;
+        const he = bounds.boundingBox.extendSize;
+        const radius = Math.max(he.x, he.y, he.z);
         return new PhysicsShapeSphere(centerLocal, radius, mesh.getScene());
     }
 }
@@ -222,7 +282,7 @@ export class PhysicsShapeCapsule extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(pointA: Vector3, pointB: Vector3, radius: number, scene: Scene) {
-        super({ type: ShapeType.CAPSULE, parameters: { pointA: pointA, pointB: pointB, radius: radius } }, scene);
+        super({ type: PhysicsShapeType.CAPSULE, parameters: { pointA: pointA, pointB: pointB, radius: radius } }, scene);
     }
 
     /**
@@ -252,7 +312,7 @@ export class PhysicsShapeCylinder extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(pointA: Vector3, pointB: Vector3, radius: number, scene: Scene) {
-        super({ type: ShapeType.CYLINDER, parameters: { pointA: pointA, pointB: pointB, radius: radius } }, scene);
+        super({ type: PhysicsShapeType.CYLINDER, parameters: { pointA: pointA, pointB: pointB, radius: radius } }, scene);
     }
 
     /**
@@ -282,7 +342,7 @@ export class PhysicsShapeBox extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(center: Vector3, rotation: Quaternion, extents: Vector3, scene: Scene) {
-        super({ type: ShapeType.BOX, parameters: { center: center, rotation: rotation, extents: extents } }, scene);
+        super({ type: PhysicsShapeType.BOX, parameters: { center: center, rotation: rotation, extents: extents } }, scene);
     }
 
     /**
@@ -308,7 +368,7 @@ export class PhysicsShapeConvexHull extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(mesh: Mesh, scene: Scene) {
-        super({ type: ShapeType.CONVEX_HULL, parameters: { mesh: mesh } }, scene);
+        super({ type: PhysicsShapeType.CONVEX_HULL, parameters: { mesh: mesh } }, scene);
     }
 }
 
@@ -322,7 +382,7 @@ export class PhysicsShapeMesh extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(mesh: Mesh, scene: Scene) {
-        super({ type: ShapeType.MESH, parameters: { mesh: mesh } }, scene);
+        super({ type: PhysicsShapeType.MESH, parameters: { mesh: mesh } }, scene);
     }
 }
 
@@ -335,6 +395,6 @@ export class PhysicsShapeContainer extends PhysicsShape {
      * @param scene scene to attach to
      */
     constructor(scene: Scene) {
-        super({ type: ShapeType.CONTAINER, parameters: {} }, scene);
+        super({ type: PhysicsShapeType.CONTAINER, parameters: {} }, scene);
     }
 }

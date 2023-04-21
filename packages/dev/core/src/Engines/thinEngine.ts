@@ -222,14 +222,14 @@ export class ThinEngine {
      */
     // Not mixed with Version for tooling purpose.
     public static get NpmPackage(): string {
-        return "babylonjs@5.54.0";
+        return "babylonjs@6.0.0";
     }
 
     /**
      * Returns the current version of the framework
      */
     public static get Version(): string {
-        return "5.54.0";
+        return "6.0.0";
     }
 
     /**
@@ -5806,11 +5806,22 @@ export class ThinEngine {
     /**
      * @internal
      */
-    public _getRGBAMultiSampleBufferFormat(type: number): number {
-        if (type === Constants.TEXTURETYPE_FLOAT) {
-            return this._gl.RGBA32F;
-        } else if (type === Constants.TEXTURETYPE_HALF_FLOAT) {
-            return this._gl.RGBA16F;
+    public _getRGBAMultiSampleBufferFormat(type: number, format = Constants.TEXTUREFORMAT_RGBA): number {
+        switch (type) {
+            case Constants.TEXTURETYPE_FLOAT:
+                switch (format) {
+                    case Constants.TEXTUREFORMAT_R:
+                        return this._gl.R32F;
+                    default:
+                        return this._gl.RGBA32F;
+                }
+            case Constants.TEXTURETYPE_HALF_FLOAT:
+                switch (format) {
+                    case Constants.TEXTUREFORMAT_R:
+                        return this._gl.R16F;
+                    default:
+                        return this._gl.RGBA16F;
+                }
         }
 
         return this._gl.RGBA8;
