@@ -222,14 +222,14 @@ export class ThinEngine {
      */
     // Not mixed with Version for tooling purpose.
     public static get NpmPackage(): string {
-        return "babylonjs@6.6.0";
+        return "babylonjs@6.10.0";
     }
 
     /**
      * Returns the current version of the framework
      */
     public static get Version(): string {
-        return "6.6.0";
+        return "6.10.0";
     }
 
     /**
@@ -1190,6 +1190,7 @@ export class ThinEngine {
             drawBuffersExtension: false,
             maxMSAASamples: 1,
             colorBufferFloat: !!(this._webGLVersion > 1 && this._gl.getExtension("EXT_color_buffer_float")),
+            colorBufferHalfFloat: !!(this._webGLVersion > 1 && this._gl.getExtension("EXT_color_buffer_half_float")),
             textureFloat: this._webGLVersion > 1 || this._gl.getExtension("OES_texture_float") ? true : false,
             textureHalfFloat: this._webGLVersion > 1 || this._gl.getExtension("OES_texture_half_float") ? true : false,
             textureHalfFloatRender: false,
@@ -1250,7 +1251,8 @@ export class ThinEngine {
             if (this._webGLVersion === 1) {
                 this._gl.getQuery = (<any>this._caps.timerQuery).getQueryEXT.bind(this._caps.timerQuery);
             }
-            this._caps.canUseTimestampForTimerQuery = (this._gl.getQuery(this._caps.timerQuery.TIMESTAMP_EXT, this._caps.timerQuery.QUERY_COUNTER_BITS_EXT) ?? 0) > 0;
+            // WebGLQuery casted to number to avoid TS error
+            this._caps.canUseTimestampForTimerQuery = ((this._gl.getQuery(this._caps.timerQuery.TIMESTAMP_EXT, this._caps.timerQuery.QUERY_COUNTER_BITS_EXT) as number) ?? 0) > 0;
         }
 
         this._caps.maxAnisotropy = this._caps.textureAnisotropicFilterExtension
@@ -1295,7 +1297,7 @@ export class ThinEngine {
             if (drawBuffersExtension !== null) {
                 this._caps.drawBuffersExtension = true;
                 this._gl.drawBuffers = drawBuffersExtension.drawBuffersWEBGL.bind(drawBuffersExtension);
-                this._gl.DRAW_FRAMEBUFFER = this._gl.FRAMEBUFFER;
+                (this._gl.DRAW_FRAMEBUFFER as any) = this._gl.FRAMEBUFFER;
 
                 for (let i = 0; i < 16; i++) {
                     (<any>this._gl)["COLOR_ATTACHMENT" + i + "_WEBGL"] = (<any>drawBuffersExtension)["COLOR_ATTACHMENT" + i + "_WEBGL"];
@@ -1791,7 +1793,7 @@ export class ThinEngine {
 
         if (IsWindowObjectExist() && IsDocumentAvailable()) {
             // make sure it is a Node object, and is a part of the document.
-            if (this._renderingCanvas && this._renderingCanvas.nodeType && document.body.contains(this._renderingCanvas)) {
+            if (this._renderingCanvas) {
                 const boundingRect = this._renderingCanvas.getBoundingClientRect
                     ? this._renderingCanvas.getBoundingClientRect()
                     : {
@@ -1799,11 +1801,8 @@ export class ThinEngine {
                           width: this._renderingCanvas.width * this._hardwareScalingLevel,
                           height: this._renderingCanvas.height * this._hardwareScalingLevel,
                       };
-                width = this._renderingCanvas.clientWidth || boundingRect.width;
-                height = this._renderingCanvas.clientHeight || boundingRect.height;
-            } else if (this._renderingCanvas) {
-                width = this._renderingCanvas.width;
-                height = this._renderingCanvas.height;
+                width = this._renderingCanvas.clientWidth || boundingRect.width || this._renderingCanvas.width || 100;
+                height = this._renderingCanvas.clientHeight || boundingRect.height || this._renderingCanvas.height || 100;
             } else {
                 width = window.innerWidth;
                 height = window.innerHeight;
@@ -2899,8 +2898,8 @@ export class ThinEngine {
         const shader = gl.createShader(type === "vertex" ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER);
 
         if (!shader) {
-            let error = gl.NO_ERROR;
-            let tempError = gl.NO_ERROR;
+            let error: GLenum = gl.NO_ERROR;
+            let tempError: GLenum = gl.NO_ERROR;
             while ((tempError = gl.getError()) !== gl.NO_ERROR) {
                 error = tempError;
             }
@@ -3800,8 +3799,8 @@ export class ThinEngine {
      */
     public _getSamplingParameters(samplingMode: number, generateMipMaps: boolean): { min: number; mag: number } {
         const gl = this._gl;
-        let magFilter = gl.NEAREST;
-        let minFilter = gl.NEAREST;
+        let magFilter: GLenum = gl.NEAREST;
+        let minFilter: GLenum = gl.NEAREST;
 
         switch (samplingMode) {
             case Constants.TEXTURE_LINEAR_LINEAR_MIPNEAREST:
@@ -4684,7 +4683,7 @@ export class ThinEngine {
     ) {
         const gl = this._gl;
 
-        let target = gl.TEXTURE_2D;
+        let target: GLenum = gl.TEXTURE_2D;
         if (texture.isCube) {
             target = gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
         }
@@ -4769,7 +4768,7 @@ export class ThinEngine {
 
         this._unpackFlipY(texture.invertY);
 
-        let target = gl.TEXTURE_2D;
+        let target: GLenum = gl.TEXTURE_2D;
         if (texture.isCube) {
             target = gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
         }
@@ -4812,8 +4811,8 @@ export class ThinEngine {
 
         this._unpackFlipY(texture.invertY);
 
-        let targetForBinding = gl.TEXTURE_2D;
-        let target = gl.TEXTURE_2D;
+        let targetForBinding: GLenum = gl.TEXTURE_2D;
+        let target: GLenum = gl.TEXTURE_2D;
         if (texture.isCube) {
             target = gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
             targetForBinding = gl.TEXTURE_CUBE_MAP;
@@ -4944,7 +4943,7 @@ export class ThinEngine {
             return this._createRenderBuffer(width, height, samples, gl.DEPTH_STENCIL, gl.DEPTH24_STENCIL8, gl.DEPTH_STENCIL_ATTACHMENT);
         }
         if (generateDepthBuffer) {
-            let depthFormat = gl.DEPTH_COMPONENT16;
+            let depthFormat: GLenum = gl.DEPTH_COMPONENT16;
             if (this._webGLVersion > 1) {
                 depthFormat = gl.DEPTH_COMPONENT32F;
             }
@@ -5620,7 +5619,7 @@ export class ThinEngine {
      * @internal
      */
     public _getInternalFormat(format: number, useSRGBBuffer = false): number {
-        let internalFormat = useSRGBBuffer ? this._glSRGBExtensionValues.SRGB8_ALPHA8 : this._gl.RGBA;
+        let internalFormat: GLenum = useSRGBBuffer ? this._glSRGBExtensionValues.SRGB8_ALPHA8 : this._gl.RGBA;
 
         switch (format) {
             case Constants.TEXTUREFORMAT_ALPHA:

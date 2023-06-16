@@ -28,6 +28,9 @@ interface IPBRMaterialPropertyGridComponentProps {
     onPropertyChangedObservable?: Observable<PropertyChangedEvent>;
 }
 
+/**
+ * @internal
+ */
 export class PBRMaterialPropertyGridComponent extends React.Component<IPBRMaterialPropertyGridComponentProps> {
     private _onDebugSelectionChangeObservable = new Observable<TextureLinkLineComponent>();
     constructor(props: IPBRMaterialPropertyGridComponentProps) {
@@ -197,6 +200,7 @@ export class PBRMaterialPropertyGridComponent extends React.Component<IPBRMateri
             { label: "Sheen Map", value: 29 },
             { label: "Anisotropic Map", value: 30 },
             { label: "Thickness Map", value: 31 },
+            { label: "Bump Map", value: 32 },
             // Env
             { label: "Env Refraction", value: 40 },
             { label: "Env Reflection", value: 41 },
@@ -220,6 +224,10 @@ export class PBRMaterialPropertyGridComponent extends React.Component<IPBRMateri
             { label: "ClearCoat NdotV", value: 68 },
             { label: "Transmittance", value: 69 },
             { label: "Refraction Transmittance", value: 70 },
+            { label: "Glossiness", value: 72 },
+            { label: "Base Color", value: 73 },
+            { label: "Specular Color", value: 74 },
+            { label: "Emissive Color", value: 75 },
             // Misc
             { label: "SEO", value: 80 },
             { label: "EHO", value: 81 },
@@ -229,6 +237,7 @@ export class PBRMaterialPropertyGridComponent extends React.Component<IPBRMateri
             { label: "Sheen Reflectance", value: 85 },
             { label: "Luminance Over Alpha", value: 86 },
             { label: "Alpha", value: 87 },
+            { label: "Albedo Alpha", value: 88 },
         ];
 
         const realTimeFilteringQualityOptions = [

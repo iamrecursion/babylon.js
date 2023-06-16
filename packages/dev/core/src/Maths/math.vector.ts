@@ -893,6 +893,7 @@ export class Vector3 {
     private static _RightReadOnly = Vector3.Right() as DeepImmutable<Vector3>;
     private static _LeftReadOnly = Vector3.Left() as DeepImmutable<Vector3>;
     private static _ZeroReadOnly = Vector3.Zero() as DeepImmutable<Vector3>;
+    private static _OneReadOnly = Vector3.One() as DeepImmutable<Vector3>;
 
     /** @internal */
     public _x: number;
@@ -2082,6 +2083,13 @@ export class Vector3 {
      */
     public static get ZeroReadOnly(): DeepImmutable<Vector3> {
         return Vector3._ZeroReadOnly;
+    }
+
+    /**
+     * Gets a one Vector3 that must not be updated
+     */
+    public static get OneReadOnly(): DeepImmutable<Vector3> {
+        return Vector3._OneReadOnly;
     }
 
     /**
@@ -4654,12 +4662,13 @@ export class Quaternion {
      * @param vecFrom defines the direction vector from which to rotate
      * @param vecTo defines the direction vector to which to rotate
      * @param result the quaternion to store the result
+     * @param epsilon defines the minimal dot value to define vecs as opposite. Default: `BABYLON.Epsilon`
      * @returns the updated quaternion
      */
-    public static FromUnitVectorsToRef<T extends Quaternion>(vecFrom: DeepImmutable<Vector3>, vecTo: DeepImmutable<Vector3>, result: T): T {
+    public static FromUnitVectorsToRef<T extends Quaternion>(vecFrom: DeepImmutable<Vector3>, vecTo: DeepImmutable<Vector3>, result: T, epsilon = Epsilon): T {
         const r = Vector3.Dot(vecFrom, vecTo) + 1;
 
-        if (r < Epsilon) {
+        if (r < epsilon) {
             if (Math.abs(vecFrom.x) > Math.abs(vecFrom.z)) {
                 result.set(-vecFrom.y, vecFrom.x, 0, 0);
             } else {

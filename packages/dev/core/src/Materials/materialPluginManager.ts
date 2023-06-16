@@ -20,9 +20,9 @@ import { MaterialPluginEvent } from "./materialPluginEvent";
 import type { Observer } from "core/Misc/observable";
 import { EngineStore } from "../Engines/engineStore";
 
-declare type Scene = import("../scene").Scene;
-declare type Engine = import("../Engines/engine").Engine;
-declare type MaterialPluginBase = import("./materialPluginBase").MaterialPluginBase;
+import type { Scene } from "../scene";
+import type { Engine } from "../Engines/engine";
+import type { MaterialPluginBase } from "./materialPluginBase";
 
 declare module "./material" {
     export interface Material {
@@ -47,7 +47,8 @@ export class MaterialPluginManager {
     protected _material: Material;
     protected _scene: Scene;
     protected _engine: Engine;
-    protected _plugins: MaterialPluginBase[] = [];
+    /** @internal */
+    public _plugins: MaterialPluginBase[] = [];
     protected _activePlugins: MaterialPluginBase[] = [];
     protected _activePluginsForExtraEvents: MaterialPluginBase[] = [];
     protected _codeInjectionPoints: { [shaderType: string]: { [codeName: string]: boolean } };
@@ -78,10 +79,10 @@ export class MaterialPluginManager {
     /**
      * @internal
      */
-    public _addPlugin(plugin: MaterialPluginBase): void {
+    public _addPlugin(plugin: MaterialPluginBase): boolean {
         for (let i = 0; i < this._plugins.length; ++i) {
             if (this._plugins[i].name === plugin.name) {
-                throw `Plugin "${plugin.name}" already added to the material "${this._material.name}"!`;
+                return false;
             }
         }
 
@@ -114,6 +115,8 @@ export class MaterialPluginManager {
         }
 
         this._defineNamesFromPlugins = defineNamesFromPlugins;
+
+        return true;
     }
 
     /**

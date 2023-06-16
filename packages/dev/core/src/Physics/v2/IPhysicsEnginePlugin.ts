@@ -1,5 +1,5 @@
 import type { Vector3, Quaternion } from "../../Maths/math.vector";
-import type { PhysicsRaycastResult } from "../physicsRaycastResult";
+import type { IRaycastQuery, PhysicsRaycastResult } from "../physicsRaycastResult";
 import type { PhysicsBody } from "./physicsBody";
 import type { PhysicsShape } from "./physicsShape";
 import type { PhysicsConstraint } from "./physicsConstraint";
@@ -403,7 +403,7 @@ export interface IPhysicsEnginePluginV2 {
     disposeConstraint(constraint: PhysicsConstraint): void;
 
     // raycast
-    raycast(from: Vector3, to: Vector3, result: PhysicsRaycastResult): void;
+    raycast(from: Vector3, to: Vector3, result: PhysicsRaycastResult, query?: IRaycastQuery): void;
 
     dispose(): void;
 }

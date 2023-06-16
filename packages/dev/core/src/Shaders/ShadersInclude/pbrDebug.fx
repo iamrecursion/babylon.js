@@ -73,6 +73,8 @@ if (vClipSpacePosition.x / vClipSpacePosition.w >= vDebugMode.x) {
         gl_FragColor.rgb = anisotropicOut.anisotropyMapData.rgb;
     #elif DEBUGMODE == 31 && defined(SUBSURFACE) && defined(SS_THICKNESSANDMASK_TEXTURE)
         gl_FragColor.rgb = subSurfaceOut.thicknessMap.rgb;
+    #elif DEBUGMODE == 32 && defined(BUMP)
+        gl_FragColor.rgb = texture2D(bumpSampler, vBumpUV).rgb;
 // Env
     #elif DEBUGMODE == 40 && defined(SS_REFRACTION)
         // Base color.
@@ -128,6 +130,17 @@ if (vClipSpacePosition.x / vClipSpacePosition.w >= vDebugMode.x) {
         gl_FragColor.rgb = subSurfaceOut.transmittance;
     #elif DEBUGMODE == 70 && defined(SUBSURFACE) && defined(SS_REFRACTION)
         gl_FragColor.rgb = subSurfaceOut.refractionTransmittance;
+    #elif DEBUGMODE == 72
+        gl_FragColor.rgb = vec3(microSurface);
+    #elif DEBUGMODE == 73
+        gl_FragColor.rgb = vAlbedoColor.rgb;
+        #define DEBUGMODE_GAMMA
+    #elif DEBUGMODE == 74 && !defined(METALLICWORKFLOW)
+        gl_FragColor.rgb = vReflectivityColor.rgb;
+        #define DEBUGMODE_GAMMA
+    #elif DEBUGMODE == 75
+        gl_FragColor.rgb = vEmissiveColor.rgb;
+        #define DEBUGMODE_GAMMA
 // Misc
     #elif DEBUGMODE == 80 && defined(RADIANCEOCCLUSION)
         gl_FragColor.rgb = vec3(seo);
@@ -148,6 +161,16 @@ if (vClipSpacePosition.x / vClipSpacePosition.w >= vDebugMode.x) {
         gl_FragColor.rgb = vec3(luminanceOverAlpha);
     #elif DEBUGMODE == 87
         gl_FragColor.rgb = vec3(alpha);
+    #elif DEBUGMODE == 88 && defined(ALBEDO)
+        gl_FragColor.rgb = vec3(albedoTexture.a);
+    // Does Not Exist
+    #else
+        float stripeWidth = 30.;
+        float stripePos = floor((gl_FragCoord.x + gl_FragCoord.y) / stripeWidth);
+        float whichColor = mod(stripePos, 2.);
+        vec3 color1 = vec3(.6,.2,.2);
+        vec3 color2 = vec3(.3,.1,.1);
+        gl_FragColor.rgb = mix(color1, color2, whichColor);
     #endif
 
     gl_FragColor.rgb *= vDebugMode.y;
@@ -163,6 +186,5 @@ if (vClipSpacePosition.x / vClipSpacePosition.w >= vDebugMode.x) {
         gl_FragData[0] = toLinearSpace(gl_FragColor); // linear to cancel gamma transform in prepass
         gl_FragData[1] = vec4(0., 0., 0., 0.); // tag as no SSS
     #endif
-    return;
 }
 #endif
