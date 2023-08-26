@@ -28,6 +28,10 @@ export enum NodeGeometryContextualSources {
     VertexID = 0x000b,
     /** FaceID */
     FaceID = 0x000c,
-    /** Bitmask of all types */
-    All = 0x0fff,
+    /** GeometryID */
+    GeometryID = 0x000d,
+    /** CollectionID */
+    CollectionID = 0x000e,
+    /** LoopID */
+    LoopID = 0x000f,
 }

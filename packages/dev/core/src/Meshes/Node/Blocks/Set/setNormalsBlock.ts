@@ -8,7 +8,7 @@ import type { VertexData } from "../../../mesh.vertexData";
 import type { Vector3 } from "../../../../Maths/math.vector";
 
 /**
- * Block used to set positions for a geometry
+ * Block used to set normals for a geometry
  */
 export class SetNormalsBlock extends NodeGeometryBlock implements INodeGeometryExecutionContext {
     private _vertexData: VertexData;
@@ -32,6 +32,14 @@ export class SetNormalsBlock extends NodeGeometryBlock implements INodeGeometryE
      * @returns the current index
      */
     public getExecutionIndex(): number {
+        return this._currentIndex;
+    }
+
+    /**
+     * Gets the current loop index in the current flow
+     * @returns the current loop index
+     */
+    public getExecutionLoopIndex(): number {
         return this._currentIndex;
     }
 

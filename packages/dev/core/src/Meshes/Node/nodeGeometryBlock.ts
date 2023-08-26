@@ -6,6 +6,7 @@ import { NodeGeometryConnectionPoint, NodeGeometryConnectionPointDirection } fro
 import type { NodeGeometryBuildState } from "./nodeGeometryBuildState";
 import { Observable } from "../../Misc/observable";
 import { PrecisionDate } from "../../Misc/precisionDate";
+import type { Nullable } from "../../types";
 
 /**
  * Defines a block that can be used inside a node based geometry
@@ -97,13 +98,10 @@ export class NodeGeometryBlock {
     }
 
     /**
-     * A free comment about the material
+     * A free comment about the block
      */
     @serialize("comment")
     public comments: string;
-
-    /** Gets or sets a boolean indicating that this input can be edited in the Inspector (false by default) */
-    public visibleInInspector = false;
 
     /** Gets or sets a boolean indicating that this input can be edited from a collapsed frame */
     public visibleOnFrame = false;
@@ -149,6 +147,58 @@ export class NodeGeometryBlock {
     }
 
     /**
+     * Checks if the current block is an ancestor of a given type
+     * @param type defines the potential type to check
+     * @returns true if block is a descendant
+     */
+    public isAnAncestorOfType(type: string): boolean {
+        if (this.getClassName() === type) {
+            return true;
+        }
+
+        for (const output of this._outputs) {
+            if (!output.hasEndpoints) {
+                continue;
+            }
+
+            for (const endpoint of output.endpoints) {
+                if (endpoint.ownerBlock.isAnAncestorOfType(type)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the first descendant using a predicate
+     * @param predicate defines the predicate to check
+     * @returns descendant or null if none found
+     */
+    public getDescendantOfPredicate(predicate: (block: NodeGeometryBlock) => boolean): Nullable<NodeGeometryBlock> {
+        if (predicate(this)) {
+            return this;
+        }
+
+        for (const output of this._outputs) {
+            if (!output.hasEndpoints) {
+                continue;
+            }
+
+            for (const endpoint of output.endpoints) {
+                const descendant = endpoint.ownerBlock.getDescendantOfPredicate(predicate);
+
+                if (descendant) {
+                    return descendant;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Creates a new NodeGeometryBlock
      * @param name defines the block name
      */
@@ -174,6 +224,7 @@ export class NodeGeometryBlock {
         const point = new NodeGeometryConnectionPoint(name, this, NodeGeometryConnectionPointDirection.Input);
         point.type = type;
         point.isOptional = isOptional;
+        point.defaultValue = value;
         point.value = value;
         point.valueMin = valueMin;
         point.valueMax = valueMax;
@@ -351,11 +402,9 @@ export class NodeGeometryBlock {
     /**
      * @internal
      */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public _deserialize(serializationObject: any) {
         this._name = serializationObject.name;
         this.comments = serializationObject.comments;
-        this.visibleInInspector = !!serializationObject.visibleInInspector;
         this.visibleOnFrame = !!serializationObject.visibleOnFrame;
         this._deserializePortDisplayNamesAndExposedOnFrame(serializationObject);
     }
@@ -400,7 +449,7 @@ export class NodeGeometryBlock {
 
     protected _dumpPropertiesCode() {
         const variableName = this._codeVariableName;
-        return `${variableName}.visibleInInspector = ${this.visibleInInspector};\r\n${variableName}.visibleOnFrame = ${this.visibleOnFrame};\r\n`;
+        return `${variableName}.visibleOnFrame = ${this.visibleOnFrame};\n`;
     }
 
     /**
@@ -426,7 +475,7 @@ export class NodeGeometryBlock {
             codeString += connectedBlock._dumpCodeForOutputConnections(alreadyDumped);
             codeString += `${connectedBlock._codeVariableName}.${connectedBlock._outputRename(connectedOutput.name)}.connectTo(${this._codeVariableName}.${this._inputRename(
                 input.name
-            )});\r\n`;
+            )});\n`;
         }
 
         return codeString;
@@ -453,11 +502,11 @@ export class NodeGeometryBlock {
         uniqueNames.push(this._codeVariableName);
 
         // Declaration
-        let codeString = `\r\n// ${this.getClassName()}\r\n`;
+        let codeString = `\n// ${this.getClassName()}\n`;
         if (this.comments) {
-            codeString += `// ${this.comments}\r\n`;
+            codeString += `// ${this.comments}\n`;
         }
-        codeString += `var ${this._codeVariableName} = new BABYLON.${this.getClassName()}("${this.name}");\r\n`;
+        codeString += `var ${this._codeVariableName} = new BABYLON.${this.getClassName()}("${this.name}");\n`;
 
         // Properties
         codeString += this._dumpPropertiesCode();

@@ -94,7 +94,10 @@ export class GeometryInputBlock extends NodeGeometryBlock {
                 this._type = NodeGeometryBlockConnectionPointTypes.Vector2;
                 break;
             case NodeGeometryContextualSources.VertexID:
+            case NodeGeometryContextualSources.GeometryID:
+            case NodeGeometryContextualSources.CollectionID:
             case NodeGeometryContextualSources.FaceID:
+            case NodeGeometryContextualSources.LoopID:
                 this._type = NodeGeometryBlockConnectionPointTypes.Int;
                 break;
         }
@@ -167,6 +170,7 @@ export class GeometryInputBlock extends NodeGeometryBlock {
      * Set the input block to its default value (based on its type)
      */
     public setDefaultValue() {
+        this.contextualValue = NodeGeometryContextualSources.None;
         switch (this.type) {
             case NodeGeometryBlockConnectionPointTypes.Int:
             case NodeGeometryBlockConnectionPointTypes.Float:
@@ -207,6 +211,47 @@ export class GeometryInputBlock extends NodeGeometryBlock {
         super.dispose();
     }
 
+    protected _dumpPropertiesCode() {
+        const variableName = this._codeVariableName;
+
+        if (this.isContextual) {
+            return (
+                super._dumpPropertiesCode() + `${variableName}.contextualValue = BABYLON.NodeGeometryContextualSources.${NodeGeometryContextualSources[this._contextualSource]};\n`
+            );
+        }
+        const codes: string[] = [];
+
+        let valueString = "";
+
+        switch (this.type) {
+            case NodeGeometryBlockConnectionPointTypes.Float:
+            case NodeGeometryBlockConnectionPointTypes.Int:
+                valueString = `${this.value}`;
+                break;
+            case NodeGeometryBlockConnectionPointTypes.Vector2:
+                valueString = `new BABYLON.Vector2(${this.value.x}, ${this.value.y})`;
+                break;
+            case NodeGeometryBlockConnectionPointTypes.Vector3:
+                valueString = `new BABYLON.Vector3(${this.value.x}, ${this.value.y}, ${this.value.z})`;
+                break;
+            case NodeGeometryBlockConnectionPointTypes.Vector4:
+                valueString = `new BABYLON.Vector4(${this.value.x}, ${this.value.y}, ${this.value.z}, ${this.value.w})`;
+                break;
+        }
+
+        // Common Property "Value"
+        codes.push(`${variableName}.value = ${valueString}`);
+
+        // Float-Value-Specific Properties
+        if (this.type === NodeGeometryBlockConnectionPointTypes.Float || this.type === NodeGeometryBlockConnectionPointTypes.Int) {
+            codes.push(`${variableName}.min = ${this.min}`, `${variableName}.max = ${this.max}`);
+        }
+
+        codes.push("");
+
+        return super._dumpPropertiesCode() + codes.join(";\n");
+    }
+
     public serialize(): any {
         const serializationObject = super.serialize();
 
@@ -216,7 +261,7 @@ export class GeometryInputBlock extends NodeGeometryBlock {
         serializationObject.max = this.max;
         serializationObject.groupInInspector = this.groupInInspector;
 
-        if (this._storedValue != null && !this.isContextual) {
+        if (this._storedValue !== null && !this.isContextual) {
             if (this._storedValue.asArray) {
                 serializationObject.valueType = "BABYLON." + this._storedValue.getClassName();
                 serializationObject.value = this._storedValue.asArray();
