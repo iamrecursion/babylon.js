@@ -5,6 +5,7 @@ import { NodeGeometryContextualSources } from "./Enums/nodeGeometryContextualSou
 import { Matrix, Vector2, Vector3, Vector4 } from "../../Maths/math.vector";
 import type { INodeGeometryExecutionContext } from "./Interfaces/nodeGeometryExecutionContext";
 import { NodeGeometryBlockConnectionPointTypes } from "./Enums/nodeGeometryConnectionPointTypes";
+import type { INodeGeometryInstancingContext } from "./Interfaces/nodeGeometryInstancingContext";
 
 /**
  * Class used to store node based geometry build state
@@ -19,16 +20,89 @@ export class NodeGeometryBuildState {
 
     /** Gets or sets the list of non connected mandatory inputs */
     public notConnectedNonOptionalInputs: NodeGeometryConnectionPoint[] = [];
+    /** Gets or sets the list of non contextual inputs having no contextudal data */
+    public noContextualData: NodeGeometryContextualSources[] = [];
     /** Gets or sets the build identifier */
     public buildId: number;
     /** Gets or sets a boolean indicating that verbose mode is on */
     public verbose: boolean;
     /** Gets or sets the vertex data */
     public vertexData: Nullable<VertexData> = null;
+
+    private _geometryContext: Nullable<VertexData> = null;
+    private _executionContext: Nullable<INodeGeometryExecutionContext> = null;
+    private _instancingContext: Nullable<INodeGeometryInstancingContext> = null;
+
+    private _geometryContextStack: Array<Nullable<VertexData>> = [];
+    private _executionContextStack: Array<Nullable<INodeGeometryExecutionContext>> = [];
+    private _instancingContextStack: Array<Nullable<INodeGeometryInstancingContext>> = [];
+
     /** Gets or sets the geometry context */
-    public geometryContext: Nullable<VertexData> = null;
+    public get geometryContext() {
+        return this._geometryContext;
+    }
+
     /** Gets or sets the execution context */
-    public executionContext: Nullable<INodeGeometryExecutionContext> = null;
+    public get executionContext() {
+        return this._executionContext;
+    }
+
+    /** Gets or sets the instancing context */
+    public get instancingContext() {
+        return this._instancingContext;
+    }
+
+    /**
+     * Push the new active geometry context
+     * @param geometryContext defines the geometry context
+     */
+    public pushGeometryContext(geometryContext: VertexData) {
+        this._geometryContext = geometryContext;
+        this._geometryContextStack.push(this._geometryContext);
+    }
+
+    /**
+     * Push the new active execution context
+     * @param executionContext defines the execution context
+     * @param instancingContext defines the instancing context
+     */
+    public pushExecutionContext(executionContext: INodeGeometryExecutionContext) {
+        this._executionContext = executionContext;
+        this._executionContextStack.push(this._executionContext);
+    }
+
+    /**
+     * Push the new active instancing context
+     * @param instancingContext defines the instancing context
+     */
+    public pushInstancingContext(instancingContext: INodeGeometryInstancingContext) {
+        this._instancingContext = instancingContext;
+        this._instancingContextStack.push(this._instancingContext);
+    }
+
+    /**
+     * Remove current geometry context and restore the previous one
+     */
+    public restoreGeometryContext() {
+        this._geometryContextStack.pop();
+        this._geometryContext = this._geometryContextStack.length > 0 ? this._geometryContextStack[this._geometryContextStack.length - 1] : null;
+    }
+
+    /**
+     * Remove current execution context and restore the previous one
+     */
+    public restoreExecutionContext() {
+        this._executionContextStack.pop();
+        this._executionContext = this._executionContextStack.length > 0 ? this._executionContextStack[this._executionContextStack.length - 1] : null;
+    }
+
+    /**
+     * Remove current isntancing context and restore the previous one
+     */
+    public restoreInstancingContext() {
+        this._instancingContextStack.pop();
+        this._instancingContext = this._instancingContextStack.length > 0 ? this._instancingContextStack[this._instancingContextStack.length - 1] : null;
+    }
 
     /**
      * Gets the value associated with a contextual source
@@ -37,6 +111,7 @@ export class NodeGeometryBuildState {
      */
     public getContextualValue(source: NodeGeometryContextualSources) {
         if (!this.executionContext) {
+            this.noContextualData.push(source);
             return null;
         }
 
@@ -105,6 +180,8 @@ export class NodeGeometryBuildState {
                 return this.executionContext.getExecutionFaceIndex();
             case NodeGeometryContextualSources.LoopID:
                 return this.executionContext.getExecutionLoopIndex();
+            case NodeGeometryContextualSources.InstanceID:
+                return this.instancingContext ? this.instancingContext.getInstanceIndex() : 0;
             case NodeGeometryContextualSources.GeometryID:
                 return !this.geometryContext ? 0 : this.geometryContext.uniqueId;
             case NodeGeometryContextualSources.CollectionID: {
@@ -185,6 +262,10 @@ export class NodeGeometryBuildState {
             }[${notConnectedInput.ownerBlock.getClassName()}] is not connected and is not optional.\n`;
         }
 
+        for (const source of this.noContextualData) {
+            errorMessage += `Contextual input ${NodeGeometryContextualSources[source]} has no context to pull data from (must be connected to a setXXX block or a instantiateXXX block).\n`;
+        }
+
         if (errorMessage) {
             throw "Build of NodeGeometry failed:\n" + errorMessage;
         }
@@ -224,6 +305,26 @@ export class NodeGeometryBuildState {
             if (clone.normals) {
                 this._tempVector3.fromArray(clone.normals, clonePositionIndex);
                 Vector3.TransformNormalToRef(this._tempVector3, transform, this._tempVector3);
+                this._tempVector3.toArray(clone.normals, clonePositionIndex);
+            }
+        }
+
+        additionalVertexData.push(clone);
+    }
+
+    /** @internal  */
+    public _instantiateWithPositionAndMatrix(clone: VertexData, currentPosition: Vector3, transform: Matrix, additionalVertexData: VertexData[]) {
+        Matrix.TranslationToRef(currentPosition.x, currentPosition.y, currentPosition.z, this._positionMatrix);
+        transform.multiplyToRef(this._positionMatrix, this._transformMatrix);
+
+        for (let clonePositionIndex = 0; clonePositionIndex < clone.positions!.length; clonePositionIndex += 3) {
+            this._tempVector3.fromArray(clone.positions!, clonePositionIndex);
+            Vector3.TransformCoordinatesToRef(this._tempVector3, this._transformMatrix, this._tempVector3);
+            this._tempVector3.toArray(clone.positions!, clonePositionIndex);
+
+            if (clone.normals) {
+                this._tempVector3.fromArray(clone.normals, clonePositionIndex);
+                Vector3.TransformNormalToRef(this._tempVector3, this._transformMatrix, this._tempVector3);
                 this._tempVector3.toArray(clone.normals, clonePositionIndex);
             }
         }
