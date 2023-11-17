@@ -25,7 +25,10 @@ import type { TargetCamera } from "./targetCamera";
 import type { Ray } from "../Culling/ray";
 import type { ArcRotateCamera } from "./arcRotateCamera";
 
-interface IObliqueParams {
+/**
+ * Oblique projection values
+ */
+export interface IObliqueParams {
     /** The angle of the plane */
     angle: number;
     /** The length of the plane */
@@ -357,7 +360,7 @@ export class Camera extends Node {
      *
      * To change the final output target of the camera, camera.outputRenderTarget should be used instead (eg. webXR renders to a render target corresponding to an HMD)
      */
-    public customRenderTargets = new Array<RenderTargetTexture>();
+    public customRenderTargets: RenderTargetTexture[] = [];
     /**
      * When set, the camera will render to this render target instead of the default canvas
      *

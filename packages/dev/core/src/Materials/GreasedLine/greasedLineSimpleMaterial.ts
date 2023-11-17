@@ -71,7 +71,9 @@ export class GreasedLineSimpleMaterial extends ShaderMaterial implements IGrease
             {
                 attributes,
                 uniforms: [
-                    "worldViewProjection",
+                    "world",
+                    "viewProjection",
+                    "view",
                     "projection",
                     "grlColorsWidth",
                     "grlUseColors",
@@ -119,6 +121,8 @@ export class GreasedLineSimpleMaterial extends ShaderMaterial implements IGrease
 
         if (options.colorsTexture) {
             this.colorsTexture = options.colorsTexture;
+        } else {
+            this.colorsTexture = GreasedLineTools.PrepareEmptyColorsTexture(scene);
         }
 
         if (this._colors) {
@@ -482,7 +486,7 @@ export class GreasedLineSimpleMaterial extends ShaderMaterial implements IGrease
         if (greasedLineMaterialOptions.colors) {
             this.colorsTexture = GreasedLineTools.CreateColorsTexture(`${this.name}-colors-texture`, greasedLineMaterialOptions.colors, this.colorsSampling, this.getScene());
         } else {
-            GreasedLineTools.PrepareEmptyColorsTexture(scene);
+            this.colorsTexture = GreasedLineTools.PrepareEmptyColorsTexture(scene);
         }
 
         this._cameraFacing = greasedLineMaterialOptions.cameraFacing ?? true;
