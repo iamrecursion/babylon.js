@@ -22,6 +22,7 @@ import "../postProcessRenderPipelineManagerSceneComponent";
 import "../../../Shaders/screenSpaceReflection2.fragment";
 import "../../../Shaders/screenSpaceReflection2Blur.fragment";
 import "../../../Shaders/screenSpaceReflection2BlurCombiner.fragment";
+import { Logger } from "core/Misc/logger";
 
 const trs = Matrix.Compose(new Vector3(0.5, 0.5, 0.5), Quaternion.Identity(), new Vector3(0.5, 0.5, 0.5));
 const trsWebGPU = Matrix.Compose(new Vector3(0.5, 0.5, 1), Quaternion.Identity(), new Vector3(0.5, 0.5, 0));
@@ -404,7 +405,7 @@ export class SSRRenderingPipeline extends PostProcessRenderPipeline {
      * When enabled, a depth renderer is created which will render the back faces of the scene to a depth texture (meaning additional work for the GPU).
      * In that mode, the "thickness" property is still used as an offset to compute the ray intersection, but you can typically use a much lower
      * value than when enableAutomaticThicknessComputation is false (it's even possible to use a value of 0 when using low values for "step")
-     * Note that for performance reasons, this option will only apply to the first camera to which the the rendering pipeline is attached!
+     * Note that for performance reasons, this option will only apply to the first camera to which the rendering pipeline is attached!
      */
     public get enableAutomaticThicknessComputation(): boolean {
         return this._enableAutomaticThicknessComputation;
@@ -652,7 +653,7 @@ export class SSRRenderingPipeline extends PostProcessRenderPipeline {
                     geometryBufferRenderer.enableReflectivity = true;
                     geometryBufferRenderer.useSpecificClearForDepthTexture = true;
                     if (geometryBufferRenderer.generateNormalsInWorldSpace) {
-                        console.error("SSRRenderingPipeline does not support generateNormalsInWorldSpace=true for the geometry buffer renderer!");
+                        Logger.Error("SSRRenderingPipeline does not support generateNormalsInWorldSpace=true for the geometry buffer renderer!");
                     }
                 }
             } else {
@@ -661,7 +662,7 @@ export class SSRRenderingPipeline extends PostProcessRenderPipeline {
                     prePassRenderer.useSpecificClearForDepthTexture = true;
                     prePassRenderer.markAsDirty();
                     if (prePassRenderer.generateNormalsInWorldSpace) {
-                        console.error("SSRRenderingPipeline does not support generateNormalsInWorldSpace=true for the prepass renderer!");
+                        Logger.Error("SSRRenderingPipeline does not support generateNormalsInWorldSpace=true for the prepass renderer!");
                     }
                 }
             }

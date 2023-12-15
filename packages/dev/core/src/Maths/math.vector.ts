@@ -1569,7 +1569,7 @@ export class Vector3 {
      * Due to float precision, scale of a mesh could be uniform but float values are off by a small fraction
      * Check if is non uniform within a certain amount of decimal places to account for this
      * @param epsilon the amount the values can differ
-     * @returns if the the vector is non uniform to a certain number of decimal places
+     * @returns if the vector is non uniform to a certain number of decimal places
      */
     public isNonUniformWithinEpsilon(epsilon: number) {
         const absX = Math.abs(this._x);
@@ -4279,7 +4279,7 @@ export class Quaternion {
     }
 
     /**
-     * Sets the given "result" as the the multiplication result of the current one with the given one "q1"
+     * Sets the given "result" as the multiplication result of the current one with the given one "q1"
      * Example Playground https://playground.babylonjs.com/#L49EJ7#45
      * @param q1 defines the second operand
      * @param result defines the target quaternion
@@ -5874,9 +5874,10 @@ export class Matrix {
      * @param rotation defines the rotation quaternion given as a reference to update
      * @param translation defines the translation vector3 given as a reference to update
      * @param preserveScalingNode Use scaling sign coming from this node. Otherwise scaling sign might change.
+     * @param useAbsoluteScaling Use scaling sign coming from this absoluteScaling when true or scaling otherwise.
      * @returns true if operation was successful
      */
-    public decompose(scale?: Vector3, rotation?: Quaternion, translation?: Vector3, preserveScalingNode?: TransformNode): boolean {
+    public decompose(scale?: Vector3, rotation?: Quaternion, translation?: Vector3, preserveScalingNode?: TransformNode, useAbsoluteScaling: boolean = true): boolean {
         if (this._isIdentity) {
             if (translation) {
                 translation.setAll(0);
@@ -5902,9 +5903,9 @@ export class Matrix {
         scale.z = Math.sqrt(m[8] * m[8] + m[9] * m[9] + m[10] * m[10]);
 
         if (preserveScalingNode) {
-            const signX = preserveScalingNode.absoluteScaling.x < 0 ? -1 : 1;
-            const signY = preserveScalingNode.absoluteScaling.y < 0 ? -1 : 1;
-            const signZ = preserveScalingNode.absoluteScaling.z < 0 ? -1 : 1;
+            const signX = (useAbsoluteScaling ? preserveScalingNode.absoluteScaling.x : preserveScalingNode.scaling.x) < 0 ? -1 : 1;
+            const signY = (useAbsoluteScaling ? preserveScalingNode.absoluteScaling.y : preserveScalingNode.scaling.y) < 0 ? -1 : 1;
+            const signZ = (useAbsoluteScaling ? preserveScalingNode.absoluteScaling.z : preserveScalingNode.scaling.z) < 0 ? -1 : 1;
 
             scale.x *= signX;
             scale.y *= signY;
@@ -5974,7 +5975,7 @@ export class Matrix {
      * @returns result input
      */
     public getRowToRef<T extends Vector4>(index: number, rowVector: T): T {
-        if (index >= 0 && index < 3) {
+        if (index >= 0 && index <= 3) {
             const i = index * 4;
             rowVector.x = this._m[i + 0];
             rowVector.y = this._m[i + 1];
@@ -6753,7 +6754,7 @@ export class Matrix {
 
     /**
      * Builds a new matrix whose values are computed by:
-     * * decomposing the the "startValue" and "endValue" matrices into their respective scale, rotation and translation matrices
+     * * decomposing the "startValue" and "endValue" matrices into their respective scale, rotation and translation matrices
      * * interpolating for "gradient" (float) the values between each of these decomposed matrices between the start and the end
      * * recomposing a new matrix from these 3 interpolated scale, rotation and translation matrices
      * Example Playground - https://playground.babylonjs.com/#AV9X17#22
@@ -6771,7 +6772,7 @@ export class Matrix {
 
     /**
      * Update a matrix to values which are computed by:
-     * * decomposing the the "startValue" and "endValue" matrices into their respective scale, rotation and translation matrices
+     * * decomposing the "startValue" and "endValue" matrices into their respective scale, rotation and translation matrices
      * * interpolating for "gradient" (float) the values between each of these decomposed matrices between the start and the end
      * * recomposing a new matrix from these 3 interpolated scale, rotation and translation matrices
      * Example Playground - https://playground.babylonjs.com/#AV9X17#23
@@ -6832,7 +6833,7 @@ export class Matrix {
      * @param result defines the target matrix
      * @returns result input
      */
-    public static LookAtLHToRef(eye: DeepImmutable<Vector3>, target: DeepImmutable<Vector3>, up: DeepImmutable<Vector3>, result: Matrix): void {
+    public static LookAtLHToRef(eye: DeepImmutable<Vector3>, target: DeepImmutable<Vector3>, up: DeepImmutable<Vector3>, result: Matrix): Matrix {
         const xAxis = MathTmp.Vector3[0];
         const yAxis = MathTmp.Vector3[1];
         const zAxis = MathTmp.Vector3[2];
@@ -6861,6 +6862,7 @@ export class Matrix {
         const ez = -Vector3.Dot(zAxis, eye);
 
         Matrix.FromValuesToRef(xAxis._x, yAxis._x, zAxis._x, 0.0, xAxis._y, yAxis._y, zAxis._y, 0.0, xAxis._z, yAxis._z, zAxis._z, 0.0, ex, ey, ez, 1.0, result);
+        return result;
     }
 
     /**

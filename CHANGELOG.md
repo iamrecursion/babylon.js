@@ -1,5 +1,221 @@
 # Changelog
 
+## 6.34.1
+
+### Core
+
+- ArcRotateCamera: Fix alpha offset inversion to not include beta = 0 - [_Bug Fix_] by [PolygonalSun](https://github.com/PolygonalSun) ([#14617](https://github.com/BabylonJS/Babylon.js/pull/14617))
+- WebGPU: ubos and storage buffers optimizations - by [Popov72](https://github.com/Popov72) ([#14611](https://github.com/BabylonJS/Babylon.js/pull/14611))
+- Animation: Fix return value of createKeyForFrame when key already exists - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14615](https://github.com/BabylonJS/Babylon.js/pull/14615))
+- Keep initial value for incremental scaling - by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14613](https://github.com/BabylonJS/Babylon.js/pull/14613))
+- Physics V2 ragdolls - [_New Feature_] by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14606](https://github.com/BabylonJS/Babylon.js/pull/14606))
+- fix circular dependency - by [carolhmj](https://github.com/carolhmj) ([#14612](https://github.com/BabylonJS/Babylon.js/pull/14612))
+
+### GUI
+
+
+### GUI Editor
+
+
+### Inspector
+
+
+### Loaders
+
+
+### Node Editor
+
+
+### Playground
+
+
+### Viewer
+
+
+## 6.34.0
+
+### Core
+
+- Morph: Fix baking of morph data when multiple non zero influences - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14605](https://github.com/BabylonJS/Babylon.js/pull/14605))
+
+## 6.33.2
+
+### Core
+
+- ComputeShader: Add a fastMode switch - by [Popov72](https://github.com/Popov72) ([#14604](https://github.com/BabylonJS/Babylon.js/pull/14604))
+- WebXR mesh detection - by [RaananW](https://github.com/RaananW) ([#14543](https://github.com/BabylonJS/Babylon.js/pull/14543))
+- Disable UBOs in Chrome mobile... - by [sebavan](https://github.com/sebavan) ([#14603](https://github.com/BabylonJS/Babylon.js/pull/14603))
+- AnimationGroupMask: Add a disabled property - by [Popov72](https://github.com/Popov72) ([#14602](https://github.com/BabylonJS/Babylon.js/pull/14602))
+- Flow Graph: glTF parsing v1 - by [carolhmj](https://github.com/carolhmj) ([#14500](https://github.com/BabylonJS/Babylon.js/pull/14500))
+- Fix code generation in GeometryInputBlock. - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14600](https://github.com/BabylonJS/Babylon.js/pull/14600))
+- Light: Add helper methods to retrieve view and projection matrices - by [Popov72](https://github.com/Popov72) ([#14598](https://github.com/BabylonJS/Babylon.js/pull/14598))
+- Scene: Fix return type of getMeshesByTags - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14599](https://github.com/BabylonJS/Babylon.js/pull/14599))
+
+### Inspector
+
+- ACE: Fixed incorrect display of loop mode when editing a property - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14594](https://github.com/BabylonJS/Babylon.js/pull/14594))
+
+### Loaders
+
+- GaussianSplat .PLY file format support - [_New Feature_] by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14601](https://github.com/BabylonJS/Babylon.js/pull/14601))
+- Flow Graph: glTF parsing v1 - by [carolhmj](https://github.com/carolhmj) ([#14500](https://github.com/BabylonJS/Babylon.js/pull/14500))
+
+### Materials
+
+- PBRCustomMaterial & CustomMaterial support MaterialPlugin - by [Starryi](https://github.com/Starryi) ([#14593](https://github.com/BabylonJS/Babylon.js/pull/14593))
+
+## 6.33.1
+
+### Core
+
+- Gaussian Splatting file loader - by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14589](https://github.com/BabylonJS/Babylon.js/pull/14589))
+- PBR material: Fix duplication of colorinstance in attribute array - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14591](https://github.com/BabylonJS/Babylon.js/pull/14591))
+- MeshUVSpaceRenderer UV Edge Blending - by [torchesburn](https://github.com/torchesburn) ([#14577](https://github.com/BabylonJS/Babylon.js/pull/14577))
+- Mesh: Fix calculation for targets other than position in getNormalsData - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14590](https://github.com/BabylonJS/Babylon.js/pull/14590))
+
+### GUI
+
+- Make inputTextArea show placeholder - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14587](https://github.com/BabylonJS/Babylon.js/pull/14587))
+
+### Loaders
+
+- Gaussian Splatting file loader - by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14589](https://github.com/BabylonJS/Babylon.js/pull/14589))
+
+## 6.33.0
+
+### Core
+
+- Materials: Add support for logarithmic depth to all materials - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14581](https://github.com/BabylonJS/Babylon.js/pull/14581))
+- Animations: Use a new mode for "relative from current" animation loop - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14584](https://github.com/BabylonJS/Babylon.js/pull/14584))
+- Gaussian Splatting - [_New Feature_] by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14578](https://github.com/BabylonJS/Babylon.js/pull/14578))
+- Quick KHR_materials_dispersion implementation - by [MiiBond](https://github.com/MiiBond) ([#14501](https://github.com/BabylonJS/Babylon.js/pull/14501))
+- feat (plane):  copyFromPositionAndNormal - by [GuoBinyong](https://github.com/GuoBinyong) ([#14570](https://github.com/BabylonJS/Babylon.js/pull/14570))
+- Fix missing internal sized formats for MSAA render targets - by [rapid-images-tore-levenstam](https://github.com/rapid-images-tore-levenstam) ([#14580](https://github.com/BabylonJS/Babylon.js/pull/14580))
+- Gizmo fixes/improvements - [_Bug Fix_] by [CedricGuillemet](https://github.com/CedricGuillemet) ([#14559](https://github.com/BabylonJS/Babylon.js/pull/14559))
+- Mesh Pick event bubbling - by [carolhmj](https://github.com/carolhmj) ([#14573](https://github.com/BabylonJS/Babylon.js/pull/14573))
+- Fix dynamic texture when context restored - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#14574](https://github.com/BabylonJS/Babylon.js/pull/14574))
+- Detect procedural texture readyness. - by [sebavan](https://github.com/sebavan) ([#14575](https://github.com/BabylonJS/Babylon.js/pull/14575))
+
+### Inspector
+
+- Animations: Use a new mode for "relative from current" animation loop - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14584](https://github.com/BabylonJS/Babylon.js/pull/14584))
+- Quick KHR_materials_dispersion implementation - by [MiiBond](https://github.com/MiiBond) ([#14501](https://github.com/BabylonJS/Babylon.js/pull/14501))
+
+### Loaders
+
+- Quick KHR_materials_dispersion implementation - by [MiiBond](https://github.com/MiiBond) ([#14501](https://github.com/BabylonJS/Babylon.js/pull/14501))
+
+### Materials
+
+- Materials: Add support for logarithmic depth to all materials - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14581](https://github.com/BabylonJS/Babylon.js/pull/14581))
+- PBR custom materials: Fix default shader name - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14576](https://github.com/BabylonJS/Babylon.js/pull/14576))
+
+### Serializers
+
+- Quick KHR_materials_dispersion implementation - by [MiiBond](https://github.com/MiiBond) ([#14501](https://github.com/BabylonJS/Babylon.js/pull/14501))
+
+## 6.32.1
+
+### Core
+
+- Post process: Add support for uniform buffers - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14568](https://github.com/BabylonJS/Babylon.js/pull/14568))
+- Animations: Fix loop relative mode to start at the current value of the animated object - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14563](https://github.com/BabylonJS/Babylon.js/pull/14563))
+- feat(gizmo): support hover & disable color - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14566](https://github.com/BabylonJS/Babylon.js/pull/14566))
+- Fix opaque only picking for rotated controls - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14561](https://github.com/BabylonJS/Babylon.js/pull/14561))
+
+### GUI
+
+- Better handling of StackPanel layout warning - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14549](https://github.com/BabylonJS/Babylon.js/pull/14549))
+- Fix opaque only picking for rotated controls - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14561](https://github.com/BabylonJS/Babylon.js/pull/14561))
+
+### Loaders
+
+- Parent group entities to object entities on the OBJ loader - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14565](https://github.com/BabylonJS/Babylon.js/pull/14565))
+- Fix camera rotation when exporting glTF - [_Bug Fix_] by [bghgary](https://github.com/bghgary) ([#14562](https://github.com/BabylonJS/Babylon.js/pull/14562))
+
+### Materials
+
+- Avoid duplicate shader created by customMaterial & pbrCustomMaterial - by [Starryi](https://github.com/Starryi) ([#14571](https://github.com/BabylonJS/Babylon.js/pull/14571))
+
+### Node Editor
+
+
+### Playground
+
+
+### Serializers
+
+- Fix camera rotation when exporting glTF - [_Bug Fix_] by [bghgary](https://github.com/bghgary) ([#14562](https://github.com/BabylonJS/Babylon.js/pull/14562))
+
+## 6.32.0
+
+### Core
+
+- Fix for animations with relative loop mode. - [_Bug Fix_] by [carolhmj](https://github.com/carolhmj) ([#14560](https://github.com/BabylonJS/Babylon.js/pull/14560))
+- Fix Matrix getRowToRef function - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#14556](https://github.com/BabylonJS/Babylon.js/pull/14556))
+- Mesh: Add a setIndexBuffer method - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14551](https://github.com/BabylonJS/Babylon.js/pull/14551))
+- Flow graph path - by [carolhmj](https://github.com/carolhmj) ([#14544](https://github.com/BabylonJS/Babylon.js/pull/14544))
+- Update dependencies - by [RaananW](https://github.com/RaananW) ([#14550](https://github.com/BabylonJS/Babylon.js/pull/14550))
+- Thin instances: Support forcedInstanceCount with thin instances - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14553](https://github.com/BabylonJS/Babylon.js/pull/14553))
+- Allow Mod Node to use float as second operand - by [Starryi](https://github.com/Starryi) ([#14547](https://github.com/BabylonJS/Babylon.js/pull/14547))
+- GeometryBufferRenderer: Use bone texture if supported - by [Popov72](https://github.com/Popov72) ([#14548](https://github.com/BabylonJS/Babylon.js/pull/14548))
+- Allows SkeletonViewer to render skeleton without mesh - by [yuripourre](https://github.com/yuripourre) ([#14538](https://github.com/BabylonJS/Babylon.js/pull/14538))
+- Fix highlight layer properties in inspector - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#14541](https://github.com/BabylonJS/Babylon.js/pull/14541))
+
+### Inspector
+
+- Allows SkeletonViewer to render skeleton without mesh - by [yuripourre](https://github.com/yuripourre) ([#14538](https://github.com/BabylonJS/Babylon.js/pull/14538))
+- Fix highlight layer properties in inspector - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#14541](https://github.com/BabylonJS/Babylon.js/pull/14541))
+
+### Loaders
+
+- glTF transmission: Fix rendering sprites and particle systems in the opaque texture - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14542](https://github.com/BabylonJS/Babylon.js/pull/14542))
+
+### Materials
+
+- Fix Add Color Uniform of CustomMaterial & PBRCustomMaterial - by [Starryi](https://github.com/Starryi) ([#14558](https://github.com/BabylonJS/Babylon.js/pull/14558))
+
+### Serializers
+
+- Update dependencies - by [RaananW](https://github.com/RaananW) ([#14550](https://github.com/BabylonJS/Babylon.js/pull/14550))
+
+## 6.31.0
+
+### Core
+
+- docs: s/the the/the - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14539](https://github.com/BabylonJS/Babylon.js/pull/14539))
+- OIT: Add a isReady method to the depth peeling renderer - by [Popov72](https://github.com/Popov72) ([#14536](https://github.com/BabylonJS/Babylon.js/pull/14536))
+- Multi canvas rendering: Allow multiple cameras when registering a view - by [Popov72](https://github.com/Popov72) ([#14535](https://github.com/BabylonJS/Babylon.js/pull/14535))
+- feat(gizmo): set custom rotation color - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14534](https://github.com/BabylonJS/Babylon.js/pull/14534))
+- Add HDR Filtering to webxr light estimation - by [RaananW](https://github.com/RaananW) ([#14526](https://github.com/BabylonJS/Babylon.js/pull/14526))
+- refactor: optimize getForwardRayToRef - by [GuoBinyong](https://github.com/GuoBinyong) ([#14531](https://github.com/BabylonJS/Babylon.js/pull/14531))
+- feat(gizmo): custom colors for gizmos - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14525](https://github.com/BabylonJS/Babylon.js/pull/14525))
+- Raw camera access feature - by [RaananW](https://github.com/RaananW) ([#14527](https://github.com/BabylonJS/Babylon.js/pull/14527))
+- DepthRenderer: Support point rendering - [_New Feature_] by [Popov72](https://github.com/Popov72) ([#14528](https://github.com/BabylonJS/Babylon.js/pull/14528))
+- Optimize duplicate member visits - by [GuoBinyong](https://github.com/GuoBinyong) ([#14523](https://github.com/BabylonJS/Babylon.js/pull/14523))
+- refactor: Optimized createPickingRay - by [GuoBinyong](https://github.com/GuoBinyong) ([#14524](https://github.com/BabylonJS/Babylon.js/pull/14524))
+
+### GUI
+
+- Fix inputTextArea isReadOnly - [_Bug Fix_] by [sebavan](https://github.com/sebavan) ([#14533](https://github.com/BabylonJS/Babylon.js/pull/14533))
+- fix: correct two misspellings - by [wy-luke](https://github.com/wy-luke) ([#14530](https://github.com/BabylonJS/Babylon.js/pull/14530))
+
+### Loaders
+
+- glTF loader: Fix checking bounds when creating a typed array - [_Bug Fix_] by [Popov72](https://github.com/Popov72) ([#14540](https://github.com/BabylonJS/Babylon.js/pull/14540))
+
+### Node Editor
+
+- docs: s/the the/the - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14539](https://github.com/BabylonJS/Babylon.js/pull/14539))
+
+### Serializers
+
+- docs: s/the the/the - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14539](https://github.com/BabylonJS/Babylon.js/pull/14539))
+
+### Viewer
+
+- docs: s/the the/the - by [PhilippeMorier](https://github.com/PhilippeMorier) ([#14539](https://github.com/BabylonJS/Babylon.js/pull/14539))
+
 ## 6.30.0
 
 ### Core

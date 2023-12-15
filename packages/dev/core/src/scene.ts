@@ -2010,6 +2010,11 @@ export class Scene extends AbstractScene implements IAnimatable, IClipPlanesHold
         // Ensures that the pre-pass renderer is enabled if it is to be enabled.
         this.prePassRenderer?.update();
 
+        // OIT
+        if (this.useOrderIndependentTransparency && this.depthPeelingRenderer) {
+            isReady &&= this.depthPeelingRenderer.isReady();
+        }
+
         // Meshes
         if (checkRenderTargets) {
             this._processedMaterials.reset();
@@ -3160,7 +3165,7 @@ export class Scene extends AbstractScene implements IAnimatable, IClipPlanesHold
 
     /**
      * Gets a light node using its name
-     * @param name defines the the light's name
+     * @param name defines the light's name
      * @returns the light or null if none found.
      */
     public getLightByName(name: string): Nullable<Light> {
@@ -4801,7 +4806,7 @@ export class Scene extends AbstractScene implements IAnimatable, IClipPlanesHold
         try {
             this.onDisposeObservable.notifyObservers(this);
         } catch (e) {
-            console.error("An error occurred while calling onDisposeObservable!", e);
+            Logger.Error("An error occurred while calling onDisposeObservable!", e);
         }
 
         this.detachControl();
@@ -5247,7 +5252,7 @@ export class Scene extends AbstractScene implements IAnimatable, IClipPlanesHold
      * @param filter defines a predicate used to filter results
      * @returns an array of Mesh
      */
-    public getMeshesByTags(tagsQuery: string, filter?: (mesh: AbstractMesh) => boolean): Mesh[] {
+    public getMeshesByTags(tagsQuery: string, filter?: (mesh: AbstractMesh) => boolean): AbstractMesh[] {
         return this._getByTags(this.meshes, tagsQuery, filter);
     }
 
