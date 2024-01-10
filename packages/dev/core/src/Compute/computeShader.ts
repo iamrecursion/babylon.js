@@ -1,5 +1,5 @@
 import type { UniformBuffer } from "../Materials/uniformBuffer";
-import type { ThinEngine } from "../Engines/thinEngine";
+import type { WebGPUEngine } from "../Engines/webgpuEngine";
 import type { Scene } from "../scene";
 import type { Nullable } from "../types";
 import { SerializationHelper, serialize } from "../Misc/decorators";
@@ -17,6 +17,8 @@ import { TextureSampler } from "../Materials/Textures/textureSampler";
 import type { DataBuffer } from "core/Buffers/dataBuffer";
 import type { ExternalTexture } from "core/Materials/Textures/externalTexture";
 import type { VideoTexture } from "core/Materials/Textures/videoTexture";
+import { WebGPUPerfCounter } from "core/Engines/WebGPU/webgpuPerfCounter";
+import type { ThinEngine } from "core/Engines/thinEngine";
 
 /**
  * Defines the options associated with the creation of a compute shader.
@@ -104,6 +106,12 @@ export class ComputeShader {
     public onError: Nullable<(effect: ComputeEffect, errors: string) => void> = null;
 
     /**
+     * Gets the GPU time spent running the compute shader for the last frame rendered (in nanoseconds).
+     * You have to enable the "timestamp-query" extension in the engine constructor options and set engine.enableGPUTimingMeasurements = true.
+     */
+    public readonly gpuTimeInFrame?: WebGPUPerfCounter;
+
+    /**
      * Instantiates a new compute shader.
      * @param name Defines the name of the compute shader in the scene
      * @param engine Defines the engine the compute shader belongs to
@@ -118,6 +126,9 @@ export class ComputeShader {
         this.name = name;
         this._engine = engine;
         this.uniqueId = UniqueIdGenerator.UniqueId;
+        if ((engine as WebGPUEngine).enableGPUTimingMeasurements) {
+            this.gpuTimeInFrame = new WebGPUPerfCounter();
+        }
 
         if (!this._engine.getCaps().supportComputeShaders) {
             Logger.Error("This engine does not support compute shaders!");
@@ -390,7 +401,7 @@ export class ComputeShader {
             }
         }
 
-        this._engine.computeDispatch(this._effect, this._context, this._bindings, x, y, z, this._options.bindingsMapping);
+        this._engine.computeDispatch(this._effect, this._context, this._bindings, x, y, z, this._options.bindingsMapping, this.gpuTimeInFrame);
 
         return true;
     }
@@ -464,7 +475,12 @@ export class ComputeShader {
      * @returns a new compute shader
      */
     public static Parse(source: any, scene: Scene, rootUrl: string): ComputeShader {
-        const compute = SerializationHelper.Parse(() => new ComputeShader(source.name, scene.getEngine(), source.shaderPath, source.options), source, scene, rootUrl);
+        const compute = SerializationHelper.Parse(
+            () => new ComputeShader(source.name, scene.getEngine() as WebGPUEngine, source.shaderPath, source.options),
+            source,
+            scene,
+            rootUrl
+        );
 
         for (const key in source.textures) {
             const binding = source.bindings[key];
