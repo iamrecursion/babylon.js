@@ -24,7 +24,7 @@ import type { PhysicsConstraint, Physics6DoFConstraint } from "../physicsConstra
 import type { PhysicsMaterial } from "../physicsMaterial";
 import { PhysicsMaterialCombineMode } from "../physicsMaterial";
 import { PhysicsShape } from "../physicsShape";
-import type { BoundingBox } from "../../../Culling/boundingBox";
+import { BoundingBox } from "../../../Culling/boundingBox";
 import type { TransformNode } from "../../../Meshes/transformNode";
 import { Mesh } from "../../../Meshes/mesh";
 import { InstancedMesh } from "../../../Meshes/instancedMesh";
@@ -288,7 +288,7 @@ export class HavokPlugin implements IPhysicsEnginePluginV2 {
     /**
      * We only have a single raycast in-flight right now
      */
-    private _queryCollector: bigint;
+    private _queryCollector;
     private _fixedTimeStep: number = 1 / 60;
     private _tmpVec3 = ArrayTools.BuildArray(3, Vector3.Zero);
     private _bodies = new Map<bigint, { body: PhysicsBody; index: number }>();
@@ -610,6 +610,8 @@ export class HavokPlugin implements IPhysicsEnginePluginV2 {
                 // transform position/orientation in parent space
                 if (parent && !parent.getWorldMatrix().isIdentity()) {
                     parent.computeWorldMatrix(true);
+                    // Save scaling for future use
+                    TmpVectors.Vector3[1].copyFrom(transformNode.scaling);
 
                     quat.normalize();
                     const finalTransform = TmpVectors.Matrix[0];
@@ -624,6 +626,8 @@ export class HavokPlugin implements IPhysicsEnginePluginV2 {
                     finalTransform.multiplyToRef(parentInverseTransform, localTransform);
                     localTransform.decomposeToTransformNode(transformNode);
                     transformNode.rotationQuaternion?.normalize();
+                    // Keep original scaling. Re-injecting scaling can introduce discontinuity between frames. Basically, it grows or shrinks.
+                    transformNode.scaling.copyFrom(TmpVectors.Vector3[1]);
                 } else {
                     transformNode.position.set(bodyTranslation[0], bodyTranslation[1], bodyTranslation[2]);
                     if (transformNode.rotationQuaternion) {
@@ -1483,7 +1487,31 @@ export class HavokPlugin implements IPhysicsEnginePluginV2 {
      * for collision detection and other physics calculations.
      */
     public getBoundingBox(_shape: PhysicsShape): BoundingBox {
-        return {} as BoundingBox;
+        // get local AABB
+        const aabb = this._hknp.HP_Shape_GetBoundingBox(_shape._pluginData, [
+            [0, 0, 0],
+            [0, 0, 0, 1],
+        ])[1];
+        TmpVectors.Vector3[0].set(aabb[0][0], aabb[0][1], aabb[0][2]); // min
+        TmpVectors.Vector3[1].set(aabb[1][0], aabb[1][1], aabb[1][2]); // max
+        const boundingbox = new BoundingBox(TmpVectors.Vector3[0], TmpVectors.Vector3[1], Matrix.IdentityReadOnly);
+        return boundingbox;
+    }
+
+    /**
+     * Calculates the world bounding box of a given physics body.
+     *
+     * @param body - The physics body to calculate the bounding box for.
+     * @returns The calculated bounding box.
+     *
+     * This method is useful for physics engines as it allows to calculate the
+     * boundaries of a given body.
+     */
+    public getBodyBoundingBox(body: PhysicsBody): BoundingBox {
+        // get local AABB
+        const aabb = this.getBoundingBox(body.shape!);
+        const boundingbox = new BoundingBox(aabb.minimum, aabb.maximum, body.transformNode.getWorldMatrix());
+        return boundingbox;
     }
 
     /**
@@ -2267,10 +2295,14 @@ export class HavokPlugin implements IPhysicsEnginePluginV2 {
      * Dispose the world and free resources
      */
     public dispose(): void {
-        this._hknp.HP_QueryCollector_Release(this._queryCollector);
-        this._queryCollector = BigInt(0);
-        this._hknp.HP_World_Release(this.world);
-        this.world = undefined;
+        if (this._queryCollector) {
+            this._hknp.HP_QueryCollector_Release(this._queryCollector);
+            this._queryCollector = undefined;
+        }
+        if (this.world) {
+            this._hknp.HP_World_Release(this.world);
+            this.world = undefined;
+        }
     }
 
     private _v3ToBvecRef(v: any, vec3: Vector3): void {

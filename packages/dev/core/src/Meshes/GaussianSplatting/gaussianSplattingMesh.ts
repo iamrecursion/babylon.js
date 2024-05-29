@@ -1,5 +1,5 @@
 import type { Scene } from "core/scene";
-import type { DeepImmutable, Nullable } from "core/types";
+import type { DeepImmutable, FloatArray, Nullable } from "core/types";
 import type { BaseTexture } from "core/Materials/Textures/baseTexture";
 import { SubMesh } from "../subMesh";
 import type { AbstractMesh } from "../abstractMesh";
@@ -23,7 +23,7 @@ export class GaussianSplattingMesh extends Mesh {
     private _material: Nullable<GaussianSplattingMaterial> = null;
     private _depthMix: BigInt64Array;
     private _canPostToWorker = true;
-    private _lastProj: DeepImmutable<Float32Array | number[]>;
+    private _lastProj: DeepImmutable<FloatArray>;
     private _covariancesATexture: Nullable<BaseTexture> = null;
     private _covariancesBTexture: Nullable<BaseTexture> = null;
     private _centersTexture: Nullable<BaseTexture> = null;
@@ -123,7 +123,9 @@ export class GaussianSplattingMesh extends Mesh {
                 this._frameIdLastUpdate = frameId;
                 this._canPostToWorker = false;
                 this._lastProj = this._modelViewMatrix.m.slice(0);
-                this._worker.postMessage({ view: this._modelViewMatrix.m, depthMix: this._depthMix }, [this._depthMix.buffer]);
+                this._worker.postMessage({ view: this._modelViewMatrix.m, depthMix: this._depthMix, useRightHandedSystem: this._scene.useRightHandedSystem }, [
+                    this._depthMix.buffer,
+                ]);
             }
         }
 
@@ -355,8 +357,13 @@ export class GaussianSplattingMesh extends Mesh {
                     indices[2 * j] = j;
                 }
 
+                let depthFactor = -1;
+                if (e.data.useRightHandedSystem) {
+                    depthFactor = 1;
+                }
+
                 for (let j = 0; j < vertexCount; j++) {
-                    floatMix[2 * j + 1] = 10000 - (viewProj[2] * positions[3 * j + 0] + viewProj[6] * positions[3 * j + 1] + viewProj[10] * positions[3 * j + 2]);
+                    floatMix[2 * j + 1] = 10000 + (viewProj[2] * positions[3 * j + 0] + viewProj[6] * positions[3 * j + 1] + viewProj[10] * positions[3 * j + 2]) * depthFactor;
                 }
 
                 depthMix.sort();
