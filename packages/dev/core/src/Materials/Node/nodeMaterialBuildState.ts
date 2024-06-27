@@ -215,15 +215,52 @@ export class NodeMaterialBuildState {
     /**
      * @internal
      */
-    public _emit2DSampler(name: string) {
-        if (this.samplers.indexOf(name) < 0) {
+    public _emit2DSampler(name: string, define = "", force = false) {
+        if (this.samplers.indexOf(name) < 0 || force) {
+            if (define) {
+                this._samplerDeclaration += `#if ${define}\n`;
+            }
+
             if (this.shaderLanguage === ShaderLanguage.WGSL) {
                 this._samplerDeclaration += `var ${name + Constants.AUTOSAMPLERSUFFIX}: sampler;\n`;
                 this._samplerDeclaration += `var ${name}: texture_2d<f32>;\n`;
             } else {
                 this._samplerDeclaration += `uniform sampler2D ${name};\n`;
             }
-            this.samplers.push(name);
+
+            if (define) {
+                this._samplerDeclaration += `#endif\n`;
+            }
+
+            if (!force) {
+                this.samplers.push(name);
+            }
+        }
+    }
+
+    /**
+     * @internal
+     */
+    public _emitCubeSampler(name: string, define = "", force = false) {
+        if (this.samplers.indexOf(name) < 0 || force) {
+            if (define) {
+                this._samplerDeclaration += `#if ${define}\n`;
+            }
+
+            if (this.shaderLanguage === ShaderLanguage.WGSL) {
+                this._samplerDeclaration += `var ${name + Constants.AUTOSAMPLERSUFFIX}: sampler;\n`;
+                this._samplerDeclaration += `var ${name}: texture_cube<f32>;\n`;
+            } else {
+                this._samplerDeclaration += `uniform samplerCube ${name};\n`;
+            }
+
+            if (define) {
+                this._samplerDeclaration += `#endif\n`;
+            }
+
+            if (!force) {
+                this.samplers.push(name);
+            }
         }
     }
 
@@ -543,6 +580,76 @@ export class NodeMaterialBuildState {
         } else {
             return `${this._getShaderType(type)} ${name}`;
         }
+    }
+
+    /**
+     * @internal
+     */
+    public _samplerCubeFunc() {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return "textureSample";
+        }
+        return "textureCube";
+    }
+
+    /**
+     * @internal
+     */
+    public _samplerFunc() {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return "textureSample";
+        }
+        return "texture2D";
+    }
+
+    /**
+     * @internal
+     */
+    public _samplerLODFunc() {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return "textureSampleLevel";
+        }
+        return "texture2DLodEXT";
+    }
+
+    /**
+     * @internal
+     */
+    public _generateTextureSample(uv: string, samplerName: string) {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return `${this._samplerFunc()}(${samplerName},${samplerName + Constants.AUTOSAMPLERSUFFIX}, ${uv})`;
+        }
+        return `${this._samplerFunc()}(${samplerName}, ${uv})`;
+    }
+
+    /**
+     * @internal
+     */
+    public _generateTextureSampleLOD(uv: string, samplerName: string, lod: string) {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return `${this._samplerLODFunc()}(${samplerName},${samplerName + Constants.AUTOSAMPLERSUFFIX}, ${uv}, ${lod})`;
+        }
+        return `${this._samplerLODFunc()}(${samplerName}, ${uv}, ${lod})`;
+    }
+
+    /**
+     * @internal
+     */
+    public _generateTextureSampleCube(uv: string, samplerName: string) {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return `${this._samplerCubeFunc()}(${samplerName},${samplerName + Constants.AUTOSAMPLERSUFFIX}, ${uv})`;
+        }
+        return `${this._samplerCubeFunc()}(${samplerName}, ${uv})`;
+    }
+
+    /**
+     * @internal
+     */
+    public _generateTextureSampleCubeLOD(uv: string, samplerName: string, lod: string) {
+        if (this.shaderLanguage === ShaderLanguage.WGSL) {
+            return `${this._samplerCubeFunc()}(${samplerName},${samplerName + Constants.AUTOSAMPLERSUFFIX}, ${uv}, ${lod})`;
+        }
+        return `${this._samplerCubeFunc()}(${samplerName}, ${uv}, ${lod})`;
     }
 
     private _convertVariableDeclarationToWGSL(type: string, dest: string, source: string): string {

@@ -3502,7 +3502,7 @@ export class ThinEngine extends AbstractEngine {
      * @internal
      */
     public _releaseTexture(texture: InternalTexture): void {
-        this._deleteTexture(texture._hardwareTexture?.underlyingResource);
+        this._deleteTexture(texture._hardwareTexture as Nullable<WebGLHardwareTexture>);
 
         // Unbind channels
         this.unbindAllTextures();
@@ -3529,10 +3529,8 @@ export class ThinEngine extends AbstractEngine {
         }
     }
 
-    protected _deleteTexture(texture: Nullable<WebGLTexture>): void {
-        if (texture) {
-            this._gl.deleteTexture(texture);
-        }
+    protected _deleteTexture(texture: Nullable<WebGLHardwareTexture>): void {
+        texture?.release();
     }
 
     protected _setProgram(program: WebGLProgram): void {
@@ -3888,16 +3886,6 @@ export class ThinEngine extends AbstractEngine {
      * Dispose and release all associated resources
      */
     public override dispose(): void {
-        super.dispose();
-
-        if (this._dummyFramebuffer) {
-            this._gl.deleteFramebuffer(this._dummyFramebuffer);
-        }
-
-        // Unbind
-        this.unbindAllAttributes();
-        this._boundUniforms = {};
-
         // Events
         if (IsWindowObjectExist()) {
             if (this._renderingCanvas) {
@@ -3907,6 +3895,17 @@ export class ThinEngine extends AbstractEngine {
                 }
             }
         }
+
+        // Should not be moved up of renderingCanvas will be null.
+        super.dispose();
+
+        if (this._dummyFramebuffer) {
+            this._gl.deleteFramebuffer(this._dummyFramebuffer);
+        }
+
+        // Unbind
+        this.unbindAllAttributes();
+        this._boundUniforms = {};
 
         this._workingCanvas = null;
         this._workingContext = null;

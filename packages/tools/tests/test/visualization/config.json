@@ -2,6 +2,35 @@
     "root": "https://cdn.babylonjs.com",
     "tests": [
         {
+            "title": "BoundingInfo Helper",
+            "playgroundId": "#BCNJD4#42",
+            "referenceImage": "bbhelper.png",
+            "excludedEngines": ["webgl1"]
+        },
+        {
+            "title": "NME Shadow Map",
+            "playgroundId": "#M3QR7E#83",
+            "referenceImage": "nmeshadowmap.png",
+            "excludedEngines": ["webgl1"]
+        },
+        {
+            "title": "NMEGLTF",
+            "playgroundId": "#WGZLGJ#10320",
+            "referenceImage": "nmegltf.png"
+        },
+        {
+            "title": "GPUPicker",
+            "playgroundId": "#1RWFMT#2",
+            "renderCount": 20,
+            "referenceImage": "gpuPicker.png"
+        },
+        {
+            "title": "Trailmesh - tapered and untapered",
+            "playgroundId": "#XGGSWJ#1",
+            "renderCount": 100,
+            "referenceImage": "trailMesh.png"
+        },
+        {
             "title": "3D Procedural Textures",
             "playgroundId": "#AYZY4Q#7",
             "renderCount": 5,
@@ -1149,6 +1178,17 @@
             "referenceImage": "objStanfordBunnyNormalsRoundTripRH.png"
         },
         {
+            "title": "glTF to OBJ (LH)",
+            "playgroundId": "#HYZWGK#3",
+            "referenceImage": "gltfToObjLH.png"
+        },
+        {
+            "title": "glTF to OBJ (RH)",
+            "playgroundId": "#HYZWGK#3",
+            "replace": "//options//, useRightHandedSystem = true;",
+            "referenceImage": "gltfToObjRH.png"
+        },
+        {
             "title": "GLTF Extension KHR_materials_variants",
             "playgroundId": "#BKGTKL#3",
             "referenceImage": "gltfExtensionKhrMaterialsVariants.png"
@@ -2076,6 +2116,11 @@
             "title": "Shadows in RHS mode",
             "playgroundId": "#RO51RT#14",
             "referenceImage": "shadows-rhs.png"
+        },
+        {
+            "title": "Load environment from data buffer",
+            "playgroundId": "#YLI4J1#",
+            "referenceImage": "environment-from-data-buffer.png"
         }
     ]
 }

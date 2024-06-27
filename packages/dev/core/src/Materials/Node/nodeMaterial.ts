@@ -2,10 +2,10 @@
 import type { NodeMaterialBlock } from "./nodeMaterialBlock";
 import { PushMaterial } from "../pushMaterial";
 import type { Scene } from "../../scene";
-import { AbstractMesh } from "../../Meshes/abstractMesh";
+import type { AbstractMesh } from "../../Meshes/abstractMesh";
 import { Matrix, Vector2 } from "../../Maths/math.vector";
 import { Color3, Color4 } from "../../Maths/math.color";
-import type { Mesh } from "../../Meshes/mesh";
+import { Mesh } from "../../Meshes/mesh";
 import { NodeMaterialBuildState } from "./nodeMaterialBuildState";
 import type { IEffectCreationOptions } from "../effect";
 import { Effect } from "../effect";
@@ -1098,13 +1098,13 @@ export class NodeMaterial extends PushMaterial {
 
         const defines = new NodeMaterialDefines();
 
-        const dummyMesh = new AbstractMesh(tempName + "PostProcess", this.getScene());
+        const dummyMesh = new Mesh(tempName + "PostProcess", this.getScene());
 
         let buildId = this._buildId;
 
         this._processDefines(dummyMesh, defines);
 
-        Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString);
+        Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString, this.shaderLanguage);
 
         if (!postProcess) {
             postProcess = new PostProcess(
@@ -1122,7 +1122,8 @@ export class NodeMaterial extends PushMaterial {
                 tempName,
                 { maxSimultaneousLights: this.maxSimultaneousLights },
                 false,
-                textureFormat
+                textureFormat,
+                this.shaderLanguage
             );
         } else {
             postProcess.updateEffect(
@@ -1192,14 +1193,14 @@ export class NodeMaterial extends PushMaterial {
 
         const proceduralTexture = new ProceduralTexture(tempName, size, null, scene);
 
-        const dummyMesh = new AbstractMesh(tempName + "Procedural", this.getScene());
+        const dummyMesh = new Mesh(tempName + "Procedural", this.getScene());
         dummyMesh.reservedDataStore = {
             hidden: true,
         };
 
         const defines = new NodeMaterialDefines();
         const result = this._processDefines(dummyMesh, defines);
-        Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString);
+        Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString, this.shaderLanguage);
 
         let effect = this.getScene().getEngine().createEffect(
             {
@@ -1211,7 +1212,10 @@ export class NodeMaterial extends PushMaterial {
             this._fragmentCompilationState.samplers,
             defines.toString(),
             result?.fallbacks,
-            undefined
+            undefined,
+            undefined,
+            undefined,
+            this.shaderLanguage
         );
 
         proceduralTexture.nodeMaterialSource = this;
@@ -1233,7 +1237,7 @@ export class NodeMaterial extends PushMaterial {
             const result = this._processDefines(dummyMesh, defines);
 
             if (result) {
-                Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString);
+                Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, this._vertexCompilationState._builtCompilationString, this.shaderLanguage);
 
                 TimingTools.SetImmediate(() => {
                     effect = this.getScene().getEngine().createEffect(
@@ -1278,7 +1282,7 @@ export class NodeMaterial extends PushMaterial {
         if (!dummyMesh) {
             dummyMesh = this.getScene().getMeshByName(this.name + "Particle");
             if (!dummyMesh) {
-                dummyMesh = new AbstractMesh(this.name + "Particle", this.getScene());
+                dummyMesh = new Mesh(this.name + "Particle", this.getScene());
                 dummyMesh.reservedDataStore = {
                     hidden: true,
                 };
@@ -1293,9 +1297,9 @@ export class NodeMaterial extends PushMaterial {
         if (!effect) {
             const result = this._processDefines(dummyMesh, defines);
 
-            Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString);
+            Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, undefined, this.shaderLanguage);
 
-            particleSystem.fillDefines(particleSystemDefines, blendMode);
+            particleSystem.fillDefines(particleSystemDefines, blendMode, false);
 
             join = particleSystemDefines.join("\n");
 
@@ -1309,7 +1313,8 @@ export class NodeMaterial extends PushMaterial {
                     result?.fallbacks,
                     onCompiled,
                     onError,
-                    particleSystem
+                    particleSystem,
+                    this.shaderLanguage
                 );
 
             particleSystem.setCustomEffect(effect, blendMode);
@@ -1328,7 +1333,7 @@ export class NodeMaterial extends PushMaterial {
 
             particleSystemDefines.length = 0;
 
-            particleSystem.fillDefines(particleSystemDefines, blendMode);
+            particleSystem.fillDefines(particleSystemDefines, blendMode, false);
 
             const particleSystemDefinesJoinedCurrent = particleSystemDefines.join("\n");
 
@@ -1340,7 +1345,7 @@ export class NodeMaterial extends PushMaterial {
             const result = this._processDefines(dummyMesh!, defines!);
 
             if (result) {
-                Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString);
+                Effect.RegisterShader(tempName, this._fragmentCompilationState._builtCompilationString, undefined, this.shaderLanguage);
 
                 effect = this.getScene()
                     .getEngine()
@@ -2463,6 +2468,9 @@ export class NodeMaterial extends PushMaterial {
 
                         nodeMaterial.parseSerializedObject(serializationObject, undefined, undefined, urlRewriter);
                         nodeMaterial.snippetId = snippetId;
+
+                        // We reset sideOrientation to default value
+                        nodeMaterial.sideOrientation = null;
 
                         try {
                             if (!skipBuild) {

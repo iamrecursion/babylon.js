@@ -55,6 +55,18 @@ import { checkNonFloatVertexBuffers } from "../Buffers/buffer.nonFloatVertexBuff
 import type { ShaderProcessingContext } from "./Processors/shaderProcessingOptions";
 import { NativeShaderProcessingContext } from "./Native/nativeShaderProcessingContext";
 import type { ShaderLanguage } from "../Materials/shaderLanguage";
+import type { WebGLHardwareTexture } from "./WebGL/webGLHardwareTexture";
+
+import "../Buffers/buffer.align";
+
+// REVIEW: add a flag to effect to prevent multiple compilations of the same shader.
+declare module "../Materials/effect" {
+    /** internal */
+    export interface Effect {
+        /** internal */
+        _checkedNonFloatVertexBuffers?: boolean;
+    }
+}
 
 declare const _native: INative;
 
@@ -538,7 +550,10 @@ export class NativeEngine extends Engine {
         effect: Effect,
         overrideVertexBuffers?: { [kind: string]: Nullable<VertexBuffer> }
     ): void {
-        checkNonFloatVertexBuffers(vertexBuffers, effect);
+        if (!effect._checkedNonFloatVertexBuffers) {
+            checkNonFloatVertexBuffers(vertexBuffers, effect);
+            effect._checkedNonFloatVertexBuffers = true;
+        }
 
         if (indexBuffer) {
             this._engine.recordIndexBuffer(vertexArray, indexBuffer.nativeIndexBuffer!);
@@ -1552,9 +1567,9 @@ export class NativeEngine extends Engine {
         return this._engine.createTexture();
     }
 
-    protected override _deleteTexture(texture: Nullable<WebGLTexture>): void {
+    protected override _deleteTexture(texture: Nullable<WebGLHardwareTexture>): void {
         if (texture) {
-            this._engine.deleteTexture(texture as NativeTexture);
+            this._engine.deleteTexture(texture.underlyingResource as NativeTexture);
         }
     }
 
@@ -2030,6 +2045,7 @@ export class NativeEngine extends Engine {
      * @param fallback defines texture to use while falling back when (compressed) texture file not found.
      * @param loaderOptions options to be passed to the loader
      * @param useSRGBBuffer defines if the texture must be loaded in a sRGB GPU buffer (if supported by the GPU).
+     * @param buffer defines the data buffer to load instead of loading the rootUrl
      * @returns the cube texture as an InternalTexture
      */
     public override createCubeTexture(
@@ -2046,7 +2062,8 @@ export class NativeEngine extends Engine {
         lodOffset: number = 0,
         fallback: Nullable<InternalTexture> = null,
         loaderOptions?: any,
-        useSRGBBuffer = false
+        useSRGBBuffer = false,
+        buffer: Nullable<ArrayBufferView> = null
     ): InternalTexture {
         const texture = fallback ? fallback : new InternalTexture(this, InternalTextureSource.Cube);
         texture.isCube = true;
@@ -2059,6 +2076,7 @@ export class NativeEngine extends Engine {
         if (!this._doNotHandleContextLost) {
             texture._extension = forcedExtension;
             texture._files = files;
+            texture._buffer = buffer;
         }
 
         const lastDot = rootUrl.lastIndexOf(".");
@@ -2105,7 +2123,9 @@ export class NativeEngine extends Engine {
                 );
             };
 
-            if (files && files.length === 6) {
+            if (buffer) {
+                onloaddata(buffer);
+            } else if (files && files.length === 6) {
                 throw new Error(`Multi-file loading not allowed on env files.`);
             } else {
                 const onInternalError = (request?: IWebRequest, exception?: any) => {

@@ -8,9 +8,9 @@ import { WebGPUShaderProcessingContext } from "./webgpuShaderProcessingContext";
 import * as WebGPUConstants from "./webgpuConstants";
 import { Logger } from "../../Misc/logger";
 import { WebGPUShaderProcessor } from "./webgpuShaderProcessor";
-import { RemoveComments } from "../../Misc/codeStringParsingTools";
+import { RemoveComments, InjectStartingAndEndingCode } from "../../Misc/codeStringParsingTools";
 import { ShaderLanguage } from "../../Materials/shaderLanguage";
-import { InjectStartingAndEndingCode } from "../../Misc/codeStringParsingTools";
+
 import { Constants } from "../constants";
 
 import "../../ShadersWGSL/ShadersInclude/bonesDeclaration";
@@ -42,6 +42,10 @@ import "../../ShadersWGSL/ShadersInclude/bumpFragment";
 import "../../ShadersWGSL/ShadersInclude/bumpFragmentMainFunctions";
 import "../../ShadersWGSL/ShadersInclude/bumpFragmentFunctions";
 import "../../ShadersWGSL/ShadersInclude/samplerFragmentDeclaration";
+import "../../ShadersWGSL/ShadersInclude/imageProcessingDeclaration";
+import "../../ShadersWGSL/ShadersInclude/imageProcessingFunctions";
+import "../../ShadersWGSL/ShadersInclude/reflectionFunction";
+import "../../ShadersWGSL/particles.vertex";
 
 const builtInName_frag_depth = "fragmentOutputs.fragDepth";
 
@@ -451,10 +455,8 @@ export class WebGPUShaderProcessorWGSL extends WebGPUShaderProcessor {
 
             const name = match[1]; // name of the variable
             const samplerType = match[2]; // sampler or sampler_comparison
-            const textureName =
-                name.indexOf(Constants.AUTOSAMPLERSUFFIX) === name.length - Constants.AUTOSAMPLERSUFFIX.length
-                    ? name.substring(0, name.indexOf(Constants.AUTOSAMPLERSUFFIX))
-                    : null;
+            const suffixLessLength = name.length - Constants.AUTOSAMPLERSUFFIX.length;
+            const textureName = name.lastIndexOf(Constants.AUTOSAMPLERSUFFIX) === suffixLessLength ? name.substring(0, suffixLessLength) : null;
             const samplerBindingType = samplerType === "sampler_comparison" ? WebGPUConstants.SamplerBindingType.Comparison : WebGPUConstants.SamplerBindingType.Filtering;
 
             if (textureName) {
