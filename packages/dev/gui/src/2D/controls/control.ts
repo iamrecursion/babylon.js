@@ -2344,7 +2344,7 @@ export class Control implements IAnimatable, IFocusableControl {
      * @internal
      */
     public _onPointerOut(target: Control, pi: Nullable<PointerInfoBase>, force = false): void {
-        if (!force && (!this._isEnabled || target === this)) {
+        if (!force && !this._isEnabled) {
             return;
         }
         this._enterCount = 0;
@@ -2367,6 +2367,10 @@ export class Control implements IAnimatable, IFocusableControl {
         // Prevent pointerout to lose control context.
         // Event redundancy is checked inside the function.
         this._onPointerEnter(this, pi);
+
+        if (this.tabIndex !== -1) {
+            this.host.focusedControl = this;
+        }
 
         if (this._downCount !== 0) {
             return false;
