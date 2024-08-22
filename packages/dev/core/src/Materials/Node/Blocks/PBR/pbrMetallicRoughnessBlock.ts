@@ -106,7 +106,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         this._isUnique = true;
 
         this.registerInput("worldPosition", NodeMaterialBlockConnectionPointTypes.Vector4, false, NodeMaterialBlockTargets.Vertex);
-        this.registerInput("worldNormal", NodeMaterialBlockConnectionPointTypes.Vector4, false, NodeMaterialBlockTargets.Fragment);
+        this.registerInput("worldNormal", NodeMaterialBlockConnectionPointTypes.Vector4, false, NodeMaterialBlockTargets.Vertex);
         this.registerInput("view", NodeMaterialBlockConnectionPointTypes.Matrix, false);
         this.registerInput("cameraPosition", NodeMaterialBlockConnectionPointTypes.Vector3, false, NodeMaterialBlockTargets.Fragment);
         this.registerInput("perturbedNormal", NodeMaterialBlockConnectionPointTypes.Vector4, true, NodeMaterialBlockTargets.Fragment);
@@ -435,6 +435,20 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
 
         state._excludeVariableName("vClipSpacePosition");
         state._excludeVariableName("vDebugMode");
+
+        this._initShaderSourceAsync(state.shaderLanguage);
+    }
+
+    private async _initShaderSourceAsync(shaderLanguage: ShaderLanguage) {
+        this._codeIsReady = false;
+        if (shaderLanguage === ShaderLanguage.WGSL) {
+            await Promise.all([import("../../../../ShadersWGSL/pbr.vertex"), import("../../../../ShadersWGSL/pbr.fragment")]);
+        } else {
+            await Promise.all([import("../../../../Shaders/pbr.vertex"), import("../../../../Shaders/pbr.fragment")]);
+        }
+
+        this._codeIsReady = true;
+        this.onCodeIsReadyObservable.notifyObservers(this);
     }
 
     /**
@@ -868,6 +882,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
 
     private _injectVertexCode(state: NodeMaterialBuildState) {
         const worldPos = this.worldPosition;
+        const worldNormal = this.worldNormal;
         const comments = `//${this.name}`;
         const isWebGPU = state.shaderLanguage === ShaderLanguage.WGSL;
 
@@ -898,6 +913,11 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         const worldPosVaryingName = "v_" + worldPos.associatedVariableName;
         if (state._emitVaryingFromString(worldPosVaryingName, NodeMaterialBlockConnectionPointTypes.Vector4)) {
             state.compilationString += (isWebGPU ? "vertexOutputs." : "") + `${worldPosVaryingName} = ${worldPos.associatedVariableName};\n`;
+        }
+
+        const worldNormalVaryingName = "v_" + worldNormal.associatedVariableName;
+        if (state._emitVaryingFromString(worldNormalVaryingName, NodeMaterialBlockConnectionPointTypes.Vector4)) {
+            state.compilationString += (isWebGPU ? "vertexOutputs." : "") + `${worldNormalVaryingName} = ${worldNormal.associatedVariableName};\n`;
         }
 
         const reflectionBlock = this.reflection.isConnected ? (this.reflection.connectedPoint?.ownerBlock as ReflectionBlock) : null;
@@ -1054,10 +1074,13 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         const normalShading = this.perturbedNormal;
 
         let worldPosVarName = this.worldPosition.associatedVariableName;
+        let worldNormalVarName = this.worldNormal.associatedVariableName;
         if (this.generateOnlyFragmentCode) {
             worldPosVarName = state._getFreeVariableName("globalWorldPos");
-            state._emitFunction("pbr_globalworldpos", `vec3${state.fSuffix} ${worldPosVarName};\n`, comments);
             state.compilationString += `${worldPosVarName} = ${this.worldPosition.associatedVariableName}.xyz;\n`;
+
+            worldNormalVarName = state._getFreeVariableName("globalWorldNormal");
+            state.compilationString += `${worldNormalVarName} = ${this.worldNormal.associatedVariableName}.xyz;\n`;
 
             state.compilationString += state._emitCodeFromInclude("shadowsVertex", comments, {
                 repeatKey: "maxSimultaneousLights",
@@ -1069,6 +1092,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
             state.compilationString += `#endif\n`;
         } else {
             worldPosVarName = (isWebGPU ? "input." : "") + "v_" + worldPosVarName;
+            worldNormalVarName = (isWebGPU ? "input." : "") + "v_" + worldNormalVarName;
         }
 
         this._environmentBrdfSamplerName = state._getFreeVariableName("environmentBrdfSampler");
@@ -1156,7 +1180,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         // _____________________________ Geometry Information ____________________________
         this._vNormalWName = state._getFreeVariableName("vNormalW");
 
-        state.compilationString += `${state._declareLocalVar(this._vNormalWName, NodeMaterialBlockConnectionPointTypes.Vector4)} = normalize(${this.worldNormal.associatedVariableName});\n`;
+        state.compilationString += `${state._declareLocalVar(this._vNormalWName, NodeMaterialBlockConnectionPointTypes.Vector4)} = normalize(${worldNormalVarName});\n`;
 
         if (state._registerTempVariable("viewDirectionW")) {
             state.compilationString += `${state._declareLocalVar("viewDirectionW", NodeMaterialBlockConnectionPointTypes.Vector3)} = normalize(${this.cameraPosition.associatedVariableName} - ${worldPosVarName}.xyz);\n`;
@@ -1173,7 +1197,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         state.compilationString += state._emitCodeFromInclude("pbrBlockNormalFinal", comments, {
             replaceStrings: [
                 { search: /vPositionW/g, replace: worldPosVarName + ".xyz" },
-                { search: /vEyePosition.w/g, replace: (isWebGPU ? "uniforms." : "") + this._invertNormalName },
+                { search: /vEyePosition.w/g, replace: this._invertNormalName },
             ],
         });
 
@@ -1267,15 +1291,7 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         const isTangentConnectedToAnisotropy = this.anisotropy.isConnected && (this.anisotropy.connectedPoint?.ownerBlock as AnisotropyBlock).worldTangent.isConnected;
         let vTBNAvailable = isTangentConnectedToPerturbNormal || (!this.perturbedNormal.isConnected && isTangentConnectedToAnisotropy);
 
-        state.compilationString += ClearCoatBlock.GetCode(
-            state,
-            clearcoatBlock,
-            reflectionBlock,
-            worldPosVarName,
-            generateTBNSpace,
-            vTBNAvailable,
-            this.worldNormal.associatedVariableName
-        );
+        state.compilationString += ClearCoatBlock.GetCode(state, clearcoatBlock, reflectionBlock, worldPosVarName, generateTBNSpace, vTBNAvailable, worldNormalVarName);
 
         if (generateTBNSpace) {
             vTBNAvailable = clearcoatBlock?.worldTangent.isConnected ?? false;
@@ -1334,24 +1350,18 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
             state.compilationString += state._emitCodeFromInclude("lightFragment", comments, {
                 replaceStrings: [
                     { search: /{X}/g, replace: this._lightId.toString() },
-                    { search: /vPositionW/g, replace: worldPosVarName + ".xyz" },
+                    { search: new RegExp(`${isWebGPU ? "input." : ""}vPositionW`, "g"), replace: worldPosVarName + ".xyz" },
                 ],
             });
         } else {
             state.compilationString += state._emitCodeFromInclude("lightFragment", comments, {
                 repeatKey: "maxSimultaneousLights",
-                substitutionVars: `vPositionW,${worldPosVarName}.xyz`,
+                substitutionVars: `${isWebGPU ? "input." : ""}vPositionW,${worldPosVarName}.xyz`,
             });
         }
 
         // _____________________________ Compute Final Lit Components ________________________
-        if (isWebGPU) {
-            state.compilationString += state._emitCodeFromInclude("pbrBlockFinalLitComponents", comments, {
-                replaceStrings: [{ search: /vLightingIntensity/g, replace: "uniforms.vLightingIntensity" }],
-            });
-        } else {
-            state.compilationString += state._emitCodeFromInclude("pbrBlockFinalLitComponents", comments);
-        }
+        state.compilationString += state._emitCodeFromInclude("pbrBlockFinalLitComponents", comments);
 
         // _____________________________ UNLIT (2) ________________________
         state.compilationString += `#endif\n`; // UNLIT
@@ -1367,13 +1377,12 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
 
         let replaceStrings = [
             { search: /vec3 finalEmissive[\s\S]*?finalEmissive\*=vLightingIntensity\.y;/g, replace: "" },
-            { search: /vAmbientColor/g, replace: aoColor + ` * ${isWebGPU ? "uniforms." : ""}ambientFromScene` },
-            { search: /vAmbientInfos\.w/g, replace: aoDirectLightIntensity },
+            { search: new RegExp(`${isWebGPU ? "uniforms." : ""}vAmbientColor`, "g"), replace: aoColor + ` * ${isWebGPU ? "uniforms." : ""}ambientFromScene` },
+            { search: new RegExp(`${isWebGPU ? "uniforms." : ""}vAmbientInfos.w`, "g"), replace: aoDirectLightIntensity },
         ];
 
         if (isWebGPU) {
-            replaceStrings[0] = { search: /var finalEmissive[\s\S]*?finalEmissive\*=vLightingIntensity\.y;/g, replace: "" };
-            replaceStrings.push({ search: /vLightingIntensity/g, replace: "uniforms.vLightingIntensity" });
+            replaceStrings[0] = { search: /var finalEmissive[\s\S]*?finalEmissive\*=uniforms.vLightingIntensity\.y;/g, replace: "" };
         }
 
         state.compilationString += state._emitCodeFromInclude("pbrBlockFinalUnlitComponents", comments, {
@@ -1386,16 +1395,22 @@ export class PBRMetallicRoughnessBlock extends NodeMaterialBlock {
         });
 
         // _____________________________ Apply image processing ________________________
+        if (isWebGPU) {
+            replaceStrings = [{ search: /mesh.visibility/g, replace: "1." }];
+        } else {
+            replaceStrings = [{ search: /visibility/g, replace: "1." }];
+        }
+
         state.compilationString += state._emitCodeFromInclude("pbrBlockImageProcessing", comments, {
-            replaceStrings: [{ search: /visibility/g, replace: "1." }],
+            replaceStrings: replaceStrings,
         });
 
         // _____________________________ Generate debug code ________________________
 
         const colorOutput = isWebGPU ? "fragmentOutputs.color" : "gl_FragColor";
         replaceStrings = [
-            { search: /vNormalW/g, replace: this._vNormalWName },
-            { search: /vPositionW/g, replace: worldPosVarName },
+            { search: new RegExp(`${isWebGPU ? "fragmentInputs." : ""}vNormalW`, "g"), replace: this._vNormalWName },
+            { search: new RegExp(`${isWebGPU ? "fragmentInputs." : ""}vPositionW`, "g"), replace: worldPosVarName },
             {
                 search: /albedoTexture\.rgb;/g,
                 replace: `vec3${state.fSuffix}(1.);\n${colorOutput}.rgb = toGammaSpace(${colorOutput}.rgb);\n`,
