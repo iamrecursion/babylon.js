@@ -223,14 +223,13 @@ export class OutlineRenderer implements ISceneComponent {
         effect.setMatrix("world", effectiveMesh.getWorldMatrix());
 
         // Bones
-        BindBonesParameters(effectiveMesh, effect);
-
-        if (renderingMesh.morphTargetManager && renderingMesh.morphTargetManager.isUsingTextureForTargets) {
-            renderingMesh.morphTargetManager._bind(effect);
-        }
+        BindBonesParameters(renderingMesh, effect);
 
         // Morph targets
         BindMorphTargetParameters(renderingMesh, effect);
+        if (renderingMesh.morphTargetManager && renderingMesh.morphTargetManager.isUsingTextureForTargets) {
+            renderingMesh.morphTargetManager._bind(effect);
+        }
 
         if (!hardwareInstancedRendering) {
             renderingMesh._bind(subMesh, effect, material.fillMode);
@@ -238,8 +237,8 @@ export class OutlineRenderer implements ISceneComponent {
 
         // Baked vertex animations
         const bvaManager = subMesh.getMesh().bakedVertexAnimationManager;
-        if (hardwareInstancedRendering && bvaManager && bvaManager.isEnabled) {
-            bvaManager.bind(effect, true);
+        if (bvaManager && bvaManager.isEnabled) {
+            bvaManager.bind(effect, hardwareInstancedRendering);
         }
 
         // Alpha test
@@ -359,9 +358,11 @@ export class OutlineRenderer implements ISceneComponent {
 
         // Baked vertex animations
         const bvaManager = mesh.bakedVertexAnimationManager;
-        if (useInstances && bvaManager && bvaManager.isEnabled) {
+        if (bvaManager && bvaManager.isEnabled) {
             defines.push("#define BAKED_VERTEX_ANIMATION_TEXTURE");
-            attribs.push("bakedVertexAnimationSettingsInstanced");
+            if (useInstances) {
+                attribs.push("bakedVertexAnimationSettingsInstanced");
+            }
         }
 
         // Get correct effect
